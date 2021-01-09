@@ -122,3 +122,5 @@ dist
 .idea
 *.iml
 /build
+/web-ext-artifacts
+.web-extension-id

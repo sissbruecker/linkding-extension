@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
 
-rm -rf dist
-mkdir dist
+# Update dependencies
+npm install
 
-yarn build
+# Run rollup build
+npm run build
 
-cp manifest.json dist
-cp -R build dist/build
-cp -R icons dist/icons
-cp -R options dist/options
-cp -R popup dist/popup
-cp -R styles dist/styles
+# Lint extension, while excluding dev files
+web-ext lint --ignore-files .idea dist docs src web-ext-artifacts .gitignore *.sh *.iml *.js *.lock
+# Build extension, while excluding dev files
+web-ext build --overwrite-dest --ignore-files .idea dist docs src web-ext-artifacts .gitignore *.sh *.iml *.js *.lock
 
 echo "✅ Done"

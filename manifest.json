@@ -1,8 +1,9 @@
 {
   "manifest_version": 2,
   "name": "linkding extension",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Companion extension for the linkding bookmark service",
+  "homepage_url": "https://github.com/sissbruecker/linkding-extension/",
 
   "icons": {
     "48": "icons/logo_48x48.png",
