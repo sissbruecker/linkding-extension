@@ -39,7 +39,7 @@ export async function getTags() {
 
 
 export async function testConnection(configuration) {
-  return fetch(`${configuration.baseUrl}/api/bookmarks/?limit=0`, {
+  return fetch(`${configuration.baseUrl}/api/bookmarks/?limit=1`, {
     headers: {
       "Authorization": `Token ${configuration.token}`
     }
