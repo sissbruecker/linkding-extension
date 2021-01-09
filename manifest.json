@@ -1,0 +1,30 @@
+{
+  "manifest_version": 2,
+  "name": "linkding extension",
+  "version": "1.0",
+  "description": "Companion extension for the linkding bookmark service",
+
+  "icons": {
+    "48": "icons/logo_48x48.png",
+    "96": "icons/logo_96x96.png"
+  },
+
+  "browser_action": {
+    "default_icon": {
+      "19": "icons/button_19x19.png",
+      "38": "icons/button_38x38.png"
+    },
+    "default_title": "Add bookmark",
+    "default_popup": "popup/index.html"
+  },
+
+  "options_ui": {
+    "page": "options/index.html"
+  },
+
+  "permissions": [
+    "tabs",
+    "http://*/*",
+    "https://*/*"
+  ]
+}
