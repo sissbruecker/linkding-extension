@@ -7,12 +7,14 @@
 
   "icons": {
     "48": "icons/logo_48x48.png",
-    "96": "icons/logo_96x96.png"
+    "96": "icons/logo_96x96.png",
+    "128": "icons/logo_128x128.png"
   },
 
   "browser_action": {
     "default_icon": {
       "19": "icons/button_19x19.png",
+      "32": "icons/button_32x32.png",
       "38": "icons/button_38x38.png"
     },
     "default_title": "Add bookmark",

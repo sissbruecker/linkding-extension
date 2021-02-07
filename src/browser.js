@@ -1,5 +1,18 @@
+function isChrome() {
+  return typeof chrome !== "undefined";
+}
+
+function getBrowser() {
+  return isChrome() ? chrome : browser;
+}
+
 export async function getCurrentTabInfo() {
-  const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+  const tabsPromise = isChrome() ? new Promise(resolve => getBrowser().tabs.query({
+    active: true,
+    currentWindow: true
+  }, resolve)) : getBrowser().tabs.query({ active: true, currentWindow: true });
+
+  const tabs = await tabsPromise;
   const tab = tabs && tabs[0];
 
   return {
@@ -8,7 +21,7 @@ export async function getCurrentTabInfo() {
   };
 }
 
-export function openOptions () {
-  browser.runtime.openOptionsPage()
-  window.close()
+export function openOptions() {
+  getBrowser().runtime.openOptionsPage();
+  window.close();
 }
