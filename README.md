@@ -2,7 +2,7 @@
 
 Companion extension for the self-hosted [linkding](https://github.com/sissbruecker/linkding) bookmark service.
 
-*NOTE: Currently only developed and tested for Firefox. Will try to add Chrome support later*
+Works with: Firefox, Chrome
 
 **Screenshot**
 
@@ -10,7 +10,9 @@ Companion extension for the self-hosted [linkding](https://github.com/sissbrueck
 
 ## Installation
 
-*TODO: Link to extension stores as soon as extension is published*
+Firefox: [Mozilla Addon Store](https://addons.mozilla.org/de/firefox/addon/linkding-extension/)
+
+Chrome: Chrome Web Store (Currently being published) 
 
 ## Manual installation
 
@@ -20,7 +22,7 @@ Run the build as described below and then follow the instructions [here](https:/
 
 ### Chrome
 
-*TODO*
+Run the build as described below and then follow the instructions [here](https://developer.chrome.com/docs/extensions/mv3/getstarted/#manifest) to load it into Chrome.
 
 ## Build
 
@@ -30,7 +32,7 @@ Run the build as described below and then follow the instructions [here](https:/
 - bash
 - web-ext
 
-First ensure that web-ext is installed, which is a tool for building distribution packages of Firefox extensions:
+First ensure that web-ext is installed, which is a tool for building distribution packages of Firefox extensions. Note that web-ext will generate a zip file which can also be used for the Chrome Web Store. To install web-ext run:
 ```
 npm install --global web-ext
 ```
