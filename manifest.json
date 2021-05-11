@@ -21,6 +21,15 @@
     "default_popup": "popup/index.html"
   },
 
+  "commands": {
+    "_execute_browser_action": {
+      "suggested_key": {
+        "default": "Ctrl+Alt+L"
+      },
+      "description": "Open a popup to bookmark current page."
+    }
+  },
+
   "options_ui": {
     "page": "options/index.html"
   },
