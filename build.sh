@@ -7,8 +7,8 @@ npm install
 npm run build
 
 # Lint extension, while excluding dev files
-web-ext lint --ignore-files .idea dist docs src web-ext-artifacts .gitignore *.sh *.iml *.js *.lock
+npx web-ext lint --ignore-files .idea dist docs src web-ext-artifacts .gitignore *.sh *.iml *.js *.lock
 # Build extension, while excluding dev files
-web-ext build --overwrite-dest --ignore-files .idea dist docs src web-ext-artifacts .gitignore *.sh *.iml *.js *.lock
+npx web-ext build --overwrite-dest --ignore-files .idea dist docs src web-ext-artifacts .gitignore *.sh *.iml *.js *.lock
 
 echo "✅ Done"

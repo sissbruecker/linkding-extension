@@ -27,15 +27,12 @@ Run the build as described below and then follow the instructions [here](https:/
 ## Build
 
 **Requirements**
-- Latest LTS Node version
-- Latest LTS NPM version
+- Latest LTS Node version (v14)
+- Latest LTS NPM version (v6)
 - bash
-- web-ext
+- npx (included with npm v5.2+)
 
-First ensure that web-ext is installed, which is a tool for building distribution packages of Firefox extensions. Note that web-ext will generate a zip file which can also be used for the Chrome Web Store. To install web-ext run:
-```
-npm install --global web-ext
-```
+Internally, we use `web-ext` to bundle a distribution package for the extension for Firefox. You do not need to install `web-ext`. Note that `web-ext` will generate a zip file which can also be used for the Chrome Web Store.
 
 Then run the following bash script to generate a build (might need to make the file executable using `chmod +x build.sh`):
 ```
