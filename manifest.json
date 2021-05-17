@@ -17,14 +17,14 @@
       "32": "icons/button_32x32.png",
       "38": "icons/button_38x38.png"
     },
-    "default_title": "Add bookmark",
+    "default_title": "Add bookmark (Alt+Shift+L)",
     "default_popup": "popup/index.html"
   },
 
   "commands": {
     "_execute_browser_action": {
       "suggested_key": {
-        "default": "Ctrl+Alt+L"
+        "default": "Alt+Shift+L"
       },
       "description": "Open a popup to bookmark current page."
     }
