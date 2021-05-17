@@ -2,6 +2,8 @@
 
 Companion extension for the self-hosted [linkding](https://github.com/sissbruecker/linkding) bookmark service.
 
+Bookmark keyboard shortcut: <kbd>Alt</kbd><kbd>Shift</kbd><kbd>L</kbd>
+
 Works with: Firefox, Chrome
 
 **Screenshot**
