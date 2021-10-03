@@ -2,7 +2,7 @@ function isChrome() {
   return typeof chrome !== "undefined";
 }
 
-function getBrowser() {
+export function getBrowser() {
   return isChrome() ? chrome : browser;
 }
 
