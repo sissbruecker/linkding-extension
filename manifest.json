@@ -11,6 +11,14 @@
     "128": "icons/logo_128x128.png"
   },
 
+  "background": {
+    "scripts": ["build/background.js"]
+  },
+
+  "omnibox": {
+    "keyword": "ld"
+  },
+
   "browser_action": {
     "default_icon": {
       "19": "icons/button_19x19.png",

@@ -5,35 +5,63 @@ import { terser } from 'rollup-plugin-terser';
 
 const production = !process.env.ROLLUP_WATCH;
 
-export default {
-	input: 'src/index.js',
-	output: {
-		sourcemap: true,
-		format: 'iife',
-		name: 'linkding',
-		file: 'build/bundle.js'
+export default [
+	// Main bundle (browser action, options page)
+	{
+		input: 'src/index.js',
+		output: {
+			sourcemap: true,
+			format: 'iife',
+			name: 'linkding',
+			file: 'build/bundle.js'
+		},
+		plugins: [
+			svelte({
+				emitCss: false
+			}),
+
+			// If you have external dependencies installed from
+			// npm, you'll most likely need these plugins. In
+			// some cases you'll need additional configuration —
+			// consult the documentation for details:
+			// https://github.com/rollup/rollup-plugin-commonjs
+			resolve({
+				browser: true,
+				dedupe: importee => importee === 'svelte' || importee.startsWith('svelte/')
+			}),
+			commonjs(),
+
+			// If we're building for production (npm run build
+			// instead of npm run dev), minify
+			production && terser()
+		],
+		watch: {
+			clearScreen: false
+		}
 	},
-	plugins: [
-		svelte({
-			emitCss: false
-		}),
+	// Background bundle
+	{
+		input: 'src/background.js',
+		output: {
+			sourcemap: true,
+			format: 'iife',
+			file: 'build/background.js'
+		},
+		plugins: [
+			// If you have external dependencies installed from
+			// npm, you'll most likely need these plugins. In
+			// some cases you'll need additional configuration —
+			// consult the documentation for details:
+			// https://github.com/rollup/rollup-plugin-commonjs
+			resolve({ browser: true }),
+			commonjs(),
 
-		// If you have external dependencies installed from
-		// npm, you'll most likely need these plugins. In
-		// some cases you'll need additional configuration —
-		// consult the documentation for details:
-		// https://github.com/rollup/rollup-plugin-commonjs
-		resolve({
-			browser: true,
-			dedupe: importee => importee === 'svelte' || importee.startsWith('svelte/')
-		}),
-		commonjs(),
-
-		// If we're building for production (npm run build
-		// instead of npm run dev), minify
-		production && terser()
-	],
-	watch: {
-		clearScreen: false
+			// If we're building for production (npm run build
+			// instead of npm run dev), minify
+			production && terser()
+		],
+		watch: {
+			clearScreen: false
+		}
 	}
-};
+];
