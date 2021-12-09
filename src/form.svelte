@@ -2,7 +2,7 @@
 
   import TagAutocomplete from './TagAutocomplete.svelte'
   import { getCurrentTabInfo, openOptions } from "./browser";
-  import { getTags, saveBookmark } from "./linkding";
+  import { getTags, saveBookmark, search } from "./linkding";
 
   let url = "";
   let title = "";
@@ -19,6 +19,14 @@
     titlePlaceholder = tabInfo.title;
     const availableTags = await getTags().catch(() => [])
     availableTagNames = availableTags.map(tag => tag.name)
+
+    const bookmarksFound = await search(url, { limit: 1000 }).catch(() => [])
+    const matchingBookmark = bookmarksFound.filter(bookmark => bookmark.url === url)[0]
+    if (matchingBookmark) {
+      tags = matchingBookmark.tag_names.join(" ")
+      title = matchingBookmark.website_title
+      description = matchingBookmark.website_description
+    }
   }
 
   init();
