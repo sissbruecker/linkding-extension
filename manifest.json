@@ -15,6 +15,14 @@
     "scripts": ["build/background.js"]
   },
 
+  "content_scripts": [
+    {
+      "matches": ["*://duckduckgo.com/*"],
+      "css": ["styles/searchInjection.css"],
+      "js": ["build/searchInjection.js"]
+    }
+  ],
+
   "omnibox": {
     "keyword": "ld"
   },
@@ -41,6 +49,8 @@
   "options_ui": {
     "page": "options/index.html"
   },
+
+  "web_accessible_resources": ["icons/*.png"],
 
   "permissions": [
     "tabs",

@@ -13,7 +13,7 @@
   },
   "homepage": "https://github.com/sissbruecker/linkding-extension#readme",
   "scripts": {
-    "build": "rollup -c",
+    "build": "rollup -c && sass scss/theme-dark.scss styles/searchInjection.css",
     "dev": "rollup -c -w"
   },
   "dependencies": {

@@ -46,3 +46,31 @@ browser.omnibox.onInputEntered.addListener((content, disposition) => {
       break;
   }
 });
+
+
+// Connection to search injection content script
+let portFromCS;
+
+function connected(p) {
+  portFromCS = p;
+
+  // When the content script sends the search term, search on linkding and 
+  // return results
+  portFromCS.onMessage.addListener(function(m) {
+    search(m.searchTerm, { limit: 5 })
+      .then((results) => {
+        const bookmarkSuggestions = results.map((bookmark) => ({
+          url: bookmark.url,
+          title: bookmark.title || bookmark.website_title || bookmark.url,
+          description: bookmark.website_description,
+          tags: bookmark.tag_names,
+        }));
+        portFromCS.postMessage({results: bookmarkSuggestions});
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  });
+};
+
+browser.runtime.onConnect.addListener(connected);

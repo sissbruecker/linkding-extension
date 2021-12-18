@@ -1,0 +1,50 @@
+div#bookmark-list-container {
+  padding: 20px 22px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  background-color: #282828;
+  color: $primary-color;
+
+  a:visited {
+    color: $link-color;
+  }
+  a:visited:hover {
+    color: $link-color-dark;
+  }
+
+  ul > li {
+    margin-top: .4rem;
+  }
+
+  #navbar {
+    display:flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+
+    #logo {
+      display: flex;
+      align-items: center;
+      font-size: 1.2rem;
+      color: inherit;
+      
+      h1 {
+        text-transform: uppercase;
+        font-size: inherit;
+        display: inline-block;
+        margin: 0 0 0 8px;
+      }
+      img.logo {
+        width: 28px;
+        height: 28px;
+      }
+    }
+    
+    #results_amount {
+      span {
+        color: $alternative-color;
+      }
+    }
+  }
+}

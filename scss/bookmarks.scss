@@ -1,0 +1,41 @@
+ul.bookmark-list {
+
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  .description {
+    color: $gray-color-dark;
+
+    a, a:visited:hover {
+      color: $alternative-color;
+    }
+  }
+
+  .actions > *:not(:last-child) {
+    margin-right: 0.1rem;
+  }
+
+  .actions .date-label a {
+    color: $gray-color;
+  }
+
+  .actions .btn-link {
+    color: $gray-color;
+    padding: 0;
+    height: auto;
+    vertical-align: unset;
+    border: none;
+
+    &:focus,
+    &:hover,
+    &:active,
+    &.active {
+      color: $gray-color-dark;
+    }
+  }
+
+  .bulk-edit-toggle {
+    display: none;
+  }
+}

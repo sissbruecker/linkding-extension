@@ -63,5 +63,30 @@ export default [
 		watch: {
 			clearScreen: false
 		}
+	},
+	// searchInjection bundle
+	{
+		input: 'src/searchInjection.js',
+		output: {
+			sourcemap: true,
+			format: 'iife',
+			file: 'build/searchInjection.js'
+		},
+		plugins: [
+			// If you have external dependencies installed from
+			// npm, you'll most likely need these plugins. In
+			// some cases you'll need additional configuration —
+			// consult the documentation for details:
+			// https://github.com/rollup/rollup-plugin-commonjs
+			resolve({ browser: true }),
+			commonjs(),
+
+			// If we're building for production (npm run build
+			// instead of npm run dev), minify
+			production && terser()
+		],
+		watch: {
+			clearScreen: false
+		}
 	}
 ];
