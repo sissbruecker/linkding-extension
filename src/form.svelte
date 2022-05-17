@@ -41,9 +41,7 @@
         title = "";
         tags = "";
         description = "";
-      }
-    console.log("BookmarkSearch = " + bookmarkSearch);
-    
+      }    
   }
 
   init();
