@@ -2,7 +2,7 @@
 
   import TagAutocomplete from './TagAutocomplete.svelte'
   import { getCurrentTabInfo, openOptions } from "./browser";
-  import { getTags, saveBookmark } from "./linkding";
+  import { getTags, saveBookmark, lookForCurrentBookmark } from "./linkding";
 
   let url = "";
   let title = "";
@@ -12,6 +12,7 @@
   let saveState = "";
   let errorMessage = "";
   let availableTagNames = []
+  let formTitle = "";
 
   async function init() {
     const tabInfo = await getCurrentTabInfo();
@@ -19,6 +20,30 @@
     titlePlaceholder = tabInfo.title;
     const availableTags = await getTags().catch(() => [])
     availableTagNames = availableTags.map(tag => tag.name)
+
+   initCurrentBookmarkData();
+  }
+
+  async function initCurrentBookmarkData() {
+    formTitle = 'Searching for existing Bookmarks';
+
+     var bookmarkSearch = await lookForCurrentBookmark(url)
+        .catch(() => []);
+
+    if ( bookmarkSearch && bookmarkSearch.length > 0 ) {
+        var temp = bookmarkSearch[0];
+        formTitle = 'Edit Bookmark';
+        title = temp.title;
+        tags = (temp.tag_names ? temp.tag_names.join(' ') : "");
+        description = temp.description;
+      } else {
+        formTitle = 'Add Bookmark';
+        title = "";
+        tags = "";
+        description = "";
+      }
+    console.log("BookmarkSearch = " + bookmarkSearch);
+    
   }
 
   init();
@@ -49,7 +74,7 @@
 
 </script>
 <div class="title-row">
-  <h6>Add bookmark</h6>
+  <h6 id="bookmark-title">{formTitle} </h6>
   <a href="#" on:click|preventDefault={handleOptions}>Options</a>
 </div>
 <div class="divider"></div>
@@ -77,7 +102,7 @@
   <div class="divider"></div>
   {#if saveState === 'success'}
     <div class="form-group has-success result-row">
-      <div class="form-input-hint"><i class="icon icon-check"></i> Bookmark added</div>
+      <div class="form-input-hint"><i class="icon icon-check"></i> Bookmark saved</div>
     </div>
   {/if}
   {#if saveState === 'error'}

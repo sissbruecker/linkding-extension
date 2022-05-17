@@ -66,3 +66,20 @@ export async function testConnection(configuration) {
     .then(body => !!body.results)
     .catch(() => false);
 }
+
+export async function lookForCurrentBookmark(url) {
+  const configuration = getConfiguration();
+
+  var encodedUrl = encodeURIComponent(url);
+  return fetch(`${configuration.baseUrl}/api/bookmarks/?q=${encodedUrl}&limit=1`, {
+    headers: {
+      "Authorization": `Token ${configuration.token}`
+    }
+  })
+    .then(response => {
+      if (response.status === 200) {
+        return response.json().then(body => body.results);
+      }
+      return Promise.reject(`Error searching for existing bookmarks: ${response.statusText}`);
+    });
+}
