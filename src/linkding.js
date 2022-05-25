@@ -68,18 +68,9 @@ export async function testConnection(configuration) {
 }
 
 export async function lookForCurrentBookmark(url) {
-  const configuration = getConfiguration();
-
-  var encodedUrl = encodeURIComponent(url);
-  return fetch(`${configuration.baseUrl}/api/bookmarks/?q=${encodedUrl}&limit=1`, {
-    headers: {
-      "Authorization": `Token ${configuration.token}`
-    }
-  })
-    .then(response => {
-      if (response.status === 200) {
-        return response.json().then(body => body.results);
-      }
-      return Promise.reject(`Error searching for existing bookmarks: ${response.statusText}`);
-    });
+  return search(url, { "limit": 1 })
+      .then(body => body && body.length > 0 ? body[0] : undefined)
+      .catch(error => {
+        console.error(error);
+      });
 }

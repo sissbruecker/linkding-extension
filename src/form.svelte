@@ -12,7 +12,8 @@
   let saveState = "";
   let errorMessage = "";
   let availableTagNames = []
-  let formTitle = "";
+  let formTitle = "Add Bookmark";
+  let bookmarkExistsWarning = "";
 
   async function init() {
     const tabInfo = await getCurrentTabInfo();
@@ -21,27 +22,27 @@
     const availableTags = await getTags().catch(() => [])
     availableTagNames = availableTags.map(tag => tag.name)
 
-   initCurrentBookmarkData();
+    loadExistingBookmarkData();
   }
 
-  async function initCurrentBookmarkData() {
-    formTitle = 'Searching for existing Bookmarks';
+  async function loadExistingBookmarkData() {
 
-     var bookmarkSearch = await lookForCurrentBookmark(url)
+     const foundBookmark = await lookForCurrentBookmark(url)
         .catch(() => []);
 
-    if ( bookmarkSearch && bookmarkSearch.length > 0 ) {
-        var temp = bookmarkSearch[0];
+    if (foundBookmark) {
         formTitle = 'Edit Bookmark';
-        title = temp.title;
-        tags = (temp.tag_names ? temp.tag_names.join(' ') : "");
-        description = temp.description;
+        title = foundBookmark.title;
+        tags = foundBookmark.tag_names ? foundBookmark.tag_names.join(" ") : "";
+        description = foundBookmark.description;
+        bookmarkExistsWarning = "This URL is already bookmarked. Making changes here will overwrite the existing bookmark when saving this form.";
       } else {
         formTitle = 'Add Bookmark';
         title = "";
         tags = "";
         description = "";
-      }    
+        bookmarkExistsWarning = "";
+      }
   }
 
   init();
@@ -72,7 +73,7 @@
 
 </script>
 <div class="title-row">
-  <h6 id="bookmark-title">{formTitle} </h6>
+  <h6>{formTitle}</h6>
   <a href="#" on:click|preventDefault={handleOptions}>Options</a>
 </div>
 <div class="divider"></div>
@@ -81,6 +82,9 @@
     <label class="form-label label-sm" for="input-url">URL</label>
     <input class="form-input input-sm" type="text" id="input-url" placeholder="URL"
            bind:value={url}>
+    <div class="form-input-hint bookmark-exists" style="display: block;">
+       {bookmarkExistsWarning}
+    </div>
   </div>
   <div class="form-group">
     <label class="form-label label-sm" for="input-tags">Tags</label>
@@ -134,5 +138,11 @@
     .result-row {
         display: flex;
         justify-content: center;
+    }
+
+    .bookmark-exists {
+      color: red;
+      margin-top: .2rem;
+      font-size: x-small;
     }
 </style>
