@@ -1,8 +1,8 @@
 <script>
 
   import TagAutocomplete from './TagAutocomplete.svelte'
-  import { getCurrentTabInfo, openOptions } from "./browser";
-  import { getTags, saveBookmark, lookForCurrentBookmark } from "./linkding";
+  import {getCurrentTabInfo, openOptions} from "./browser";
+  import {getTags, saveBookmark, findBookmarkByUrl} from "./linkding";
 
   let url = "";
   let title = "";
@@ -12,8 +12,7 @@
   let saveState = "";
   let errorMessage = "";
   let availableTagNames = []
-  let formTitle = "Add Bookmark";
-  let bookmarkExistsWarning = "";
+  let bookmarkExists = false;
 
   async function init() {
     const tabInfo = await getCurrentTabInfo();
@@ -26,23 +25,15 @@
   }
 
   async function loadExistingBookmarkData() {
+    const existingBookmark = await findBookmarkByUrl(url)
+      .catch(() => null);
 
-     const foundBookmark = await lookForCurrentBookmark(url)
-        .catch(() => []);
-
-    if (foundBookmark) {
-        formTitle = 'Edit Bookmark';
-        title = foundBookmark.title;
-        tags = foundBookmark.tag_names ? foundBookmark.tag_names.join(" ") : "";
-        description = foundBookmark.description;
-        bookmarkExistsWarning = "This URL is already bookmarked. Making changes here will overwrite the existing bookmark when saving this form.";
-      } else {
-        formTitle = 'Add Bookmark';
-        title = "";
-        tags = "";
-        description = "";
-        bookmarkExistsWarning = "";
-      }
+    if (existingBookmark) {
+      bookmarkExists = true;
+      title = existingBookmark.title;
+      tags = existingBookmark.tag_names ? existingBookmark.tag_names.join(" ") : "";
+      description = existingBookmark.description;
+    }
   }
 
   init();
@@ -73,7 +64,7 @@
 
 </script>
 <div class="title-row">
-  <h6>{formTitle}</h6>
+  <h6>{bookmarkExists ? "Edit Bookmark" : "Add bookmark"}</h6>
   <a href="#" on:click|preventDefault={handleOptions}>Options</a>
 </div>
 <div class="divider"></div>
@@ -82,9 +73,12 @@
     <label class="form-label label-sm" for="input-url">URL</label>
     <input class="form-input input-sm" type="text" id="input-url" placeholder="URL"
            bind:value={url}>
-    <div class="form-input-hint bookmark-exists" style="display: block;">
-       {bookmarkExistsWarning}
-    </div>
+    {#if bookmarkExists}
+      <div class="form-input-hint bookmark-exists">
+        This URL is already bookmarked. The form has been prefilled from the existing bookmark, and saving the form will
+        update the existing bookmark.
+      </div>
+    {/if}
   </div>
   <div class="form-group">
     <label class="form-label label-sm" for="input-tags">Tags</label>
@@ -120,6 +114,10 @@
 </form>
 
 <style>
+    form {
+        max-width: 400px;
+    }
+
     .title-row {
         display: flex;
         justify-content: space-between;
@@ -130,6 +128,7 @@
         display: flex;
         justify-content: flex-end;
     }
+
     .button-row button {
         padding-left: 32px;
         padding-right: 32px;
@@ -141,8 +140,6 @@
     }
 
     .bookmark-exists {
-      color: red;
-      margin-top: .2rem;
-      font-size: x-small;
+        color: #ffb700;
     }
 </style>
