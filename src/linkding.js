@@ -1,4 +1,4 @@
-import { getConfiguration } from "./configuration";
+import {getConfiguration} from "./configuration";
 
 export async function saveBookmark(bookmark) {
   const configuration = getConfiguration();
@@ -65,4 +65,9 @@ export async function testConnection(configuration) {
     .then(response => response.status === 200 ? response.json() : Promise.reject(response))
     .then(body => !!body.results)
     .catch(() => false);
+}
+
+export async function findBookmarkByUrl(url) {
+  return search(url, {"limit": 1})
+    .then(results => results && results.length > 0 ? results[0] : undefined);
 }
