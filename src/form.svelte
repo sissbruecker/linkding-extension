@@ -8,6 +8,7 @@
   let title = "";
   let titlePlaceholder = "";
   let description = "";
+  let descriptionPlaceholder = "";
   let tags = "";
   let saveState = "";
   let errorMessage = "";
@@ -18,6 +19,7 @@
     const tabInfo = await getCurrentTabInfo();
     url = tabInfo.url;
     titlePlaceholder = tabInfo.title;
+    descriptionPlaceholder = tabInfo.description;
     const availableTags = await getTags().catch(() => [])
     availableTagNames = availableTags.map(tag => tag.name)
 
@@ -42,8 +44,8 @@
     const tagNames = tags.split(" ").map(tag => tag.trim()).filter(tag => !!tag);
     const bookmark = {
       url,
-      title,
-      description,
+      title: title ? title : titlePlaceholder,
+      description: description ? description : descriptionPlaceholder,
       tag_names: tagNames
     };
 
@@ -93,7 +95,7 @@
     <label class="form-label label-sm" for="input-description">Description</label>
     <textarea class="form-input input-sm" id="input-description"
               bind:value={description}
-              placeholder="Leave empty to use description from website"></textarea>
+              placeholder={descriptionPlaceholder}></textarea>
   </div>
   <div class="divider"></div>
   {#if saveState === 'success'}
