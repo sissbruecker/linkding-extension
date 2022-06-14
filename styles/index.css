@@ -1,4 +1,82 @@
+:root {
+  --base-100: #ffffff;
+  --base-200: #f1f1fc;
+  --base-300: #f1f1fc;
+  --primary: #5755d9;
+  --color: #66758c;
+  --hint: #bcc3ce;
+  --border: #dadee4;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --base-100: #161822;
+    --base-200: #202331;
+    --base-300: #2a2e41;
+    --primary: #5755d9;
+    --color: #b8bdc8;
+    --hint: #7f879b;
+    --border: #4c4e53;
+  }
+}
+
+[data-theme='light'] {
+  --base-100: #ffffff;
+  --base-200: #f1f1fc;
+  --base-300: #f1f1fc;
+  --primary: #5755d9;
+  --color: #66758c;
+  --hint: #bcc3ce;
+  --border: #dadee4;
+}
+
+[data-theme='dark'] {
+  --base-100: #161822;
+  --base-200: #202331;
+  --base-300: #2a2e41;
+  --primary: #5755d9;
+  --color: #b8bdc8;
+  --hint: #7f879b;
+  --border: #4c4e53;
+}
+
+:root,
+[data-theme],
 body {
-    padding: 16px;
-    min-width: 400px;
+  background-color: var(--base-100);
+  color: var(--color);
+}
+
+body {
+  padding: 16px;
+  min-width: 400px;
+}
+
+.form-select,
+.form-input {
+  color: inherit;
+  border-color: var(--border);
+}
+
+.form-select:focus,
+.form-input:focus {
+  border-color: var(--primary);
+}
+
+.form-input {
+  background: var(--base-200);
+}
+
+:is(.form-select, #increase#specificity) {
+  background-color: var(
+    --base-200
+  ) !important /* needed to override spectre.css entry*/;
+}
+
+.form-input-hint {
+  color: var(--hint);
+}
+
+.divider {
+  border-color: var(--border);
 }
