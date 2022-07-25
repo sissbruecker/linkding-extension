@@ -9,6 +9,7 @@
   let titlePlaceholder = "";
   let description = "";
   let tags = "";
+  let unread = false;
   let saveState = "";
   let errorMessage = "";
   let availableTagNames = []
@@ -33,6 +34,7 @@
       title = existingBookmark.title;
       tags = existingBookmark.tag_names ? existingBookmark.tag_names.join(" ") : "";
       description = existingBookmark.description;
+      unread = existingBookmark.unread;
     }
   }
 
@@ -44,7 +46,8 @@
       url,
       title,
       description,
-      tag_names: tagNames
+      tag_names: tagNames,
+      unread,
     };
 
     try {
@@ -94,6 +97,13 @@
     <textarea class="form-input input-sm" id="input-description"
               bind:value={description}
               placeholder="Leave empty to use description from website"></textarea>
+  </div>
+  <div class="form-group">
+    <label class="form-checkbox">
+      <input type="checkbox" bind:checked={unread}>
+      <i class="form-icon"></i>
+      <span class="text-small">Mark as unread</span>
+    </label>
   </div>
   <div class="divider"></div>
   {#if saveState === 'success'}
