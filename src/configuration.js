@@ -1,9 +1,17 @@
 const CONFIG_KEY = 'ld_ext_config'
+const DEFAULTS = {
+  baseUrl: '',
+  token: '',
+  default_tags: '',
+}
 
 export function getConfiguration() {
   const configJson = localStorage.getItem(CONFIG_KEY)
-  const config = configJson ? JSON.parse(configJson) : {baseUrl: '', token: ''}
-  return config
+  const config = configJson ? JSON.parse(configJson) : {}
+  return {
+    ...DEFAULTS,
+    ...config,
+  }
 }
 
 export function saveConfiguration(config) {
