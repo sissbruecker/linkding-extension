@@ -3,6 +3,7 @@
   import TagAutocomplete from './TagAutocomplete.svelte'
   import {getCurrentTabInfo, openOptions} from "./browser";
   import {getTags, saveBookmark, findBookmarkByUrl} from "./linkding";
+  import {getConfiguration} from "./configuration";
 
   let url = "";
   let title = "";
@@ -16,9 +17,11 @@
   let bookmarkExists = false;
 
   async function init() {
+    const config = getConfiguration();
     const tabInfo = await getCurrentTabInfo();
     url = tabInfo.url;
     titlePlaceholder = tabInfo.title;
+    tags = config.default_tags;
     const availableTags = await getTags().catch(() => [])
     availableTagNames = availableTags.map(tag => tag.name)
 
