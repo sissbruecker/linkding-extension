@@ -1,6 +1,6 @@
 <script>
   import {getConfiguration, saveConfiguration} from "./configuration";
-  import {testConnection} from "./linkding";
+  import {LinkdingApi} from "./linkding";
 
   let baseUrl = "";
   let token = "";
@@ -8,8 +8,8 @@
   let isSuccess = false;
   let isError = false;
 
-  function init() {
-    const config = getConfiguration();
+  async function init() {
+    const config = await getConfiguration();
     baseUrl = config.baseUrl;
     token = config.token;
     default_tags = config.default_tags;
@@ -24,10 +24,10 @@
       default_tags,
     };
 
-    const testResult = await testConnection(config);
+    const testResult = await new LinkdingApi(config).testConnection(config);
 
     if (testResult) {
-      saveConfiguration(config);
+      await saveConfiguration(config);
       isError = false;
       isSuccess = true;
     } else {

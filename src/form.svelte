@@ -1,9 +1,9 @@
 <script>
-
   import TagAutocomplete from './TagAutocomplete.svelte'
   import {getCurrentTabInfo, openOptions} from "./browser";
-  import {getTags, saveBookmark, findBookmarkByUrl} from "./linkding";
-  import {getConfiguration} from "./configuration";
+
+  export let api;
+  export let configuration;
 
   let url = "";
   let title = "";
@@ -16,20 +16,25 @@
   let availableTagNames = []
   let bookmarkExists = false;
 
+  $: {
+    if (api && configuration) {
+      init();
+    }
+  }
+
   async function init() {
-    const config = getConfiguration();
     const tabInfo = await getCurrentTabInfo();
     url = tabInfo.url;
     titlePlaceholder = tabInfo.title;
-    tags = config.default_tags;
-    const availableTags = await getTags().catch(() => [])
+    tags = configuration.default_tags;
+    const availableTags = await api.getTags().catch(() => [])
     availableTagNames = availableTags.map(tag => tag.name)
 
     loadExistingBookmarkData();
   }
 
   async function loadExistingBookmarkData() {
-    const existingBookmark = await findBookmarkByUrl(url)
+    const existingBookmark = await api.findBookmarkByUrl(url)
       .catch(() => null);
 
     if (existingBookmark) {
@@ -40,8 +45,6 @@
       unread = existingBookmark.unread;
     }
   }
-
-  init();
 
   async function handleSubmit() {
     const tagNames = tags.split(" ").map(tag => tag.trim()).filter(tag => !!tag);
@@ -55,7 +58,7 @@
 
     try {
       saveState = "loading";
-      await saveBookmark(bookmark);
+      await api.saveBookmark(bookmark);
       saveState = "success";
     } catch (e) {
       saveState = "error";
