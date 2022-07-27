@@ -1,13 +1,35 @@
 <script>
   import Form from "./form.svelte";
   import Intro from "./intro.svelte";
-  import { isConfigurationComplete } from "./configuration";
+  import {getConfiguration, isConfigurationComplete} from "./configuration";
+  import {LinkdingApi} from "./linkding";
 
-  const hasCompleteConfiguration = isConfigurationComplete();
+  let hasCompleteConfiguration = true;
+  let configuration;
+  let api;
+
+  async function init() {
+    configuration = await getConfiguration();
+    hasCompleteConfiguration = isConfigurationComplete(configuration);
+    if (hasCompleteConfiguration) {
+      api = new LinkdingApi(configuration);
+    }
+  }
+
+  init();
 </script>
 
-{#if hasCompleteConfiguration}
-  <Form />
-{:else}
-  <Intro />
+<Form configuration="{configuration}" api="{api}"/>
+
+{#if !hasCompleteConfiguration}
+  <div class="modal active" id="modal-id">
+    <div class="modal-overlay"></div>
+    <div class="modal-container">
+      <div class="modal-body">
+        <div class="content">
+          <Intro/>
+        </div>
+      </div>
+    </div>
+  </div>
 {/if}

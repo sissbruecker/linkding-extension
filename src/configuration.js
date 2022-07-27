@@ -1,3 +1,5 @@
+import {getStorageItem, setStorageItem} from './browser';
+
 const CONFIG_KEY = 'ld_ext_config'
 const DEFAULTS = {
   baseUrl: '',
@@ -5,8 +7,8 @@ const DEFAULTS = {
   default_tags: '',
 }
 
-export function getConfiguration() {
-  const configJson = localStorage.getItem(CONFIG_KEY)
+export async function getConfiguration() {
+  const configJson = await getStorageItem(CONFIG_KEY)
   const config = configJson ? JSON.parse(configJson) : {}
   return {
     ...DEFAULTS,
@@ -14,13 +16,11 @@ export function getConfiguration() {
   }
 }
 
-export function saveConfiguration(config) {
+export async function saveConfiguration(config) {
   const configJson = JSON.stringify(config)
-  localStorage.setItem(CONFIG_KEY, configJson)
+  await setStorageItem(CONFIG_KEY, configJson)
 }
 
-export function isConfigurationComplete() {
-  const config = getConfiguration()
-
+export function isConfigurationComplete(config) {
   return config.baseUrl && config.token
 }
