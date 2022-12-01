@@ -11,6 +11,7 @@
   let description = "";
   let tags = "";
   let unread = false;
+  let shared = false;
   let saveState = "";
   let errorMessage = "";
   let availableTagNames = []
@@ -43,6 +44,7 @@
       tags = existingBookmark.tag_names ? existingBookmark.tag_names.join(" ") : "";
       description = existingBookmark.description;
       unread = existingBookmark.unread;
+      shared = existingBookmark.shared;
     }
   }
 
@@ -54,6 +56,7 @@
       description,
       tag_names: tagNames,
       unread,
+      shared,
     };
 
     try {
@@ -109,6 +112,13 @@
       <input type="checkbox" bind:checked={unread}>
       <i class="form-icon"></i>
       <span class="text-small">Mark as unread</span>
+    </label>
+  </div>
+  <div class="form-group">
+    <label class="form-checkbox">
+      <input type="checkbox" bind:checked={shared}>
+      <i class="form-icon"></i>
+      <span class="text-small">Share</span>
     </label>
   </div>
   <div class="divider"></div>
