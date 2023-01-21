@@ -1,6 +1,7 @@
 <script>
   import TagAutocomplete from './TagAutocomplete.svelte'
   import {getCurrentTabInfo, openOptions} from "./browser";
+  import {getCachedTabMetadata, clearCachedTabMetadata} from "./configuration";
 
   export let api;
   export let configuration;
@@ -8,6 +9,7 @@
   let url = "";
   let title = "";
   let titlePlaceholder = "";
+  let descriptionPlaceholder = "";
   let description = "";
   let tags = "";
   let unread = false;
@@ -25,7 +27,6 @@
   async function init() {
     const tabInfo = await getCurrentTabInfo();
     url = tabInfo.url;
-    titlePlaceholder = tabInfo.title;
     tags = configuration.default_tags;
     const availableTags = await api.getTags().catch(() => [])
     availableTagNames = availableTags.map(tag => tag.name)
@@ -34,16 +35,28 @@
   }
 
   async function loadExistingBookmarkData() {
-    const existingBookmark = await api.findBookmarkByUrl(url)
-      .catch(() => null);
+    let tabMetadata = await getCachedTabMetadata();
+    if (!tabMetadata || tabMetadata.metadata.url !== url) {
+      tabMetadata = await api.check(url).catch(() => null)
+    }
+
+    let existingBookmark = tabMetadata.bookmark;
 
     if (existingBookmark) {
+      // Linkding <v1.17 does not return full bookmark data from check API
+      // In that case fetch the bookmark with a separate request
+      if (!existingBookmark.date_added) {
+        existingBookmark = await api.getBookmark(existingBookmark.id);
+      }
       bookmarkExists = true;
       title = existingBookmark.title;
       tags = existingBookmark.tag_names ? existingBookmark.tag_names.join(" ") : "";
       description = existingBookmark.description;
       unread = existingBookmark.unread;
     }
+
+    titlePlaceholder = tabMetadata.metadata.title;
+    descriptionPlaceholder = tabMetadata.metadata.description;
   }
 
   async function handleSubmit() {
@@ -59,6 +72,7 @@
     try {
       saveState = "loading";
       await api.saveBookmark(bookmark);
+      await clearCachedTabMetadata();
       saveState = "success";
     } catch (e) {
       saveState = "error";
@@ -102,7 +116,7 @@
     <label class="form-label label-sm" for="input-description">Description</label>
     <textarea class="form-input input-sm" id="input-description"
               bind:value={description}
-              placeholder="Leave empty to use description from website"></textarea>
+              placeholder={descriptionPlaceholder}></textarea>
   </div>
   <div class="form-group">
     <label class="form-checkbox">

@@ -3,6 +3,26 @@ export class LinkdingApi {
     this.configuration = configuration;
   }
 
+  async getBookmark(bookmarkId) {
+    const configuration = this.configuration;
+
+    return fetch(
+      `${configuration.baseUrl}/api/bookmarks/${bookmarkId}/`,
+      {
+        headers: {
+          Authorization: `Token ${configuration.token}`,
+        },
+      }
+    ).then((response) => {
+      if (response.status === 200) {
+        return response.json();
+      }
+      return Promise.reject(
+        `Error retrieving bookmark: ${response.statusText}`
+      );
+    });
+  }
+
   async saveBookmark(bookmark) {
     const configuration = this.configuration;
 
@@ -61,6 +81,27 @@ export class LinkdingApi {
       }
       return Promise.reject(
         `Error searching bookmarks: ${response.statusText}`
+      );
+    });
+  }
+
+  async check(url) {
+    const configuration = this.configuration;
+    url = encodeURIComponent(url);
+
+    return fetch(
+      `${configuration.baseUrl}/api/bookmarks/check/?url=${url}`,
+      {
+        headers: {
+          Authorization: `Token ${configuration.token}`,
+        },
+      }
+    ).then((response) => {
+      if (response.status === 200) {
+        return response.json();
+      }
+      return Promise.reject(
+        `Error checking bookmark URL: ${response.statusText}`
       );
     });
   }
