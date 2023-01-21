@@ -1,7 +1,7 @@
 <script>
   import TagAutocomplete from './TagAutocomplete.svelte'
   import {getCurrentTabInfo, openOptions} from "./browser";
-  import {getCachedTabMetadata, clearCachedTabMetadata} from "./configuration";
+  import {loadTabMetadata, clearCachedTabMetadata} from "./cache";
 
   export let api;
   export let configuration;
@@ -35,28 +35,22 @@
   }
 
   async function loadExistingBookmarkData() {
-    let tabMetadata = await getCachedTabMetadata();
-    if (!tabMetadata || tabMetadata.metadata.url !== url) {
-      tabMetadata = await api.check(url).catch(() => null)
+    const tabMetadata = await loadTabMetadata(url);
+    if (!tabMetadata) {
+      return;
     }
 
-    let existingBookmark = tabMetadata.bookmark;
+    titlePlaceholder = tabMetadata.metadata.title;
+    descriptionPlaceholder = tabMetadata.metadata.description;
 
+    const existingBookmark = tabMetadata.bookmark;
     if (existingBookmark) {
-      // Linkding <v1.17 does not return full bookmark data from check API
-      // In that case fetch the bookmark with a separate request
-      if (!existingBookmark.date_added) {
-        existingBookmark = await api.getBookmark(existingBookmark.id);
-      }
       bookmarkExists = true;
       title = existingBookmark.title;
       tags = existingBookmark.tag_names ? existingBookmark.tag_names.join(" ") : "";
       description = existingBookmark.description;
       unread = existingBookmark.unread;
     }
-
-    titlePlaceholder = tabMetadata.metadata.title;
-    descriptionPlaceholder = tabMetadata.metadata.description;
   }
 
   async function handleSubmit() {

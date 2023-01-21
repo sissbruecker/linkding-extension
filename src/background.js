@@ -1,10 +1,7 @@
 import { getBrowser, getCurrentTabInfo } from "./browser";
+import { loadTabMetadata } from "./cache";
+import { getConfiguration, isConfigurationComplete } from "./configuration";
 import { LinkdingApi } from "./linkding";
-import {
-  getConfiguration,
-  isConfigurationComplete,
-  cacheTabMetadata,
-} from "./configuration";
 
 const browser = getBrowser();
 let api = null;
@@ -83,38 +80,17 @@ browser.omnibox.onInputEntered.addListener((content, disposition) => {
 
 /* Precache bookmark / website metadata when tab or URL changes */
 
-let cachedUrl = null;
-
-async function loadTabMetadata(url) {
-  const isReady = await initApi();
-  if (!isReady || !url || url === cachedUrl) {
-    return;
-  }
-
-  cachedUrl = url;
-
-  try {
-    const tabMetadata = await api.check(url);
-
-    await cacheTabMetadata(tabMetadata);
-  } catch (e) {
-    console.error(e);
-  }
-}
-
 browser.tabs.onActivated.addListener(async () => {
   const tabInfo = await getCurrentTabInfo();
   await loadTabMetadata(tabInfo.url);
 });
 
-browser.tabs.onUpdated.addListener(
-  async (tabId, changeInfo, tab) => {
-    // Ignore URL changes in non-active tabs
-    if (!tab.active) {
-      return;
-    }
+browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  // Only interested in URL changes
+  // Ignore URL changes in non-active tabs
+  if (!changeInfo.url || !tab.active) {
+    return;
+  }
 
-    await loadTabMetadata(tab.url);
-  },
-  { properties: ["url"] }
-);
+  await loadTabMetadata(tab.url);
+});
