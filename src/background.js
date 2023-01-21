@@ -1,26 +1,39 @@
-import { getBrowser } from "./browser";
-import { LinkdingApi } from "./linkding";
+import { getBrowser, getCurrentTabInfo } from "./browser";
+import { loadTabMetadata } from "./cache";
 import { getConfiguration, isConfigurationComplete } from "./configuration";
+import { LinkdingApi } from "./linkding";
 
 const browser = getBrowser();
 let api = null;
 let configuration = null;
 let hasCompleteConfiguration = false;
 
-browser.omnibox.onInputStarted.addListener(async () => {
+async function initApi() {
+  if (api) {
+    return true;
+  }
+
   configuration = await getConfiguration();
   hasCompleteConfiguration = isConfigurationComplete(configuration);
-  const description = hasCompleteConfiguration
-    ? "Search bookmarks in linkding"
-    : "⚠️ Please configure the linkding extension first";
-
-  browser.omnibox.setDefaultSuggestion({ description });
 
   if (hasCompleteConfiguration) {
     api = new LinkdingApi(configuration);
   } else {
     api = null;
   }
+
+  return api !== null;
+}
+
+/* Omnibox / Search integration */
+
+browser.omnibox.onInputStarted.addListener(async () => {
+  const isReady = await initApi();
+  const description = isReady
+    ? "Search bookmarks in linkding"
+    : "⚠️ Please configure the linkding extension first";
+
+  browser.omnibox.setDefaultSuggestion({ description });
 });
 
 browser.omnibox.onInputChanged.addListener((text, suggest) => {
@@ -63,4 +76,21 @@ browser.omnibox.onInputEntered.addListener((content, disposition) => {
       browser.tabs.create({ url, active: false });
       break;
   }
+});
+
+/* Precache bookmark / website metadata when tab or URL changes */
+
+browser.tabs.onActivated.addListener(async () => {
+  const tabInfo = await getCurrentTabInfo();
+  await loadTabMetadata(tabInfo.url);
+});
+
+browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  // Only interested in URL changes
+  // Ignore URL changes in non-active tabs
+  if (!changeInfo.url || !tab.active) {
+    return;
+  }
+
+  await loadTabMetadata(tab.url);
 });

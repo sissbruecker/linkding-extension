@@ -1,6 +1,7 @@
 <script>
   import TagAutocomplete from './TagAutocomplete.svelte'
   import {getCurrentTabInfo, openOptions} from "./browser";
+  import {loadTabMetadata, clearCachedTabMetadata} from "./cache";
 
   export let api;
   export let configuration;
@@ -8,6 +9,7 @@
   let url = "";
   let title = "";
   let titlePlaceholder = "";
+  let descriptionPlaceholder = "";
   let description = "";
   let tags = "";
   let unread = false;
@@ -25,7 +27,6 @@
   async function init() {
     const tabInfo = await getCurrentTabInfo();
     url = tabInfo.url;
-    titlePlaceholder = tabInfo.title;
     tags = configuration.default_tags;
     const availableTags = await api.getTags().catch(() => [])
     availableTagNames = availableTags.map(tag => tag.name)
@@ -34,9 +35,15 @@
   }
 
   async function loadExistingBookmarkData() {
-    const existingBookmark = await api.findBookmarkByUrl(url)
-      .catch(() => null);
+    const tabMetadata = await loadTabMetadata(url);
+    if (!tabMetadata) {
+      return;
+    }
 
+    titlePlaceholder = tabMetadata.metadata.title;
+    descriptionPlaceholder = tabMetadata.metadata.description;
+
+    const existingBookmark = tabMetadata.bookmark;
     if (existingBookmark) {
       bookmarkExists = true;
       title = existingBookmark.title;
@@ -59,6 +66,7 @@
     try {
       saveState = "loading";
       await api.saveBookmark(bookmark);
+      await clearCachedTabMetadata();
       saveState = "success";
     } catch (e) {
       saveState = "error";
@@ -102,7 +110,7 @@
     <label class="form-label label-sm" for="input-description">Description</label>
     <textarea class="form-input input-sm" id="input-description"
               bind:value={description}
-              placeholder="Leave empty to use description from website"></textarea>
+              placeholder={descriptionPlaceholder}></textarea>
   </div>
   <div class="form-group">
     <label class="form-checkbox">
