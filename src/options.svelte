@@ -5,6 +5,7 @@
   let baseUrl = "";
   let token = "";
   let default_tags = "";
+  let precacheEnabled = false;
   let isSuccess = false;
   let isError = false;
 
@@ -13,6 +14,7 @@
     baseUrl = config.baseUrl;
     token = config.token;
     default_tags = config.default_tags;
+    precacheEnabled = config.precacheEnabled;
   }
 
   init();
@@ -22,6 +24,7 @@
       baseUrl,
       token,
       default_tags,
+      precacheEnabled,
     };
 
     const testResult = await new LinkdingApi(config).testConnection(config);
@@ -62,6 +65,16 @@
     <input class="form-input" type="text" id="input-default-tags" placeholder="" bind:value={default_tags}>
     <div class="form-input-hint">
       Set of tags that should be added to new bookmarks by default.
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="form-checkbox">
+      <input type="checkbox" bind:checked={precacheEnabled}>
+      <i class="form-icon"></i>
+      <span>Pre-fill page information in Add Bookmark window</span>
+    </label>
+    <div class="form-input-hint">
+     <strong>Note:</strong> This will send the URL of all tabs to your Linkding server as you browse.
     </div>
   </div>
   <div class="divider"></div>

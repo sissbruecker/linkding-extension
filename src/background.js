@@ -82,7 +82,7 @@ browser.omnibox.onInputEntered.addListener((content, disposition) => {
 
 browser.tabs.onActivated.addListener(async () => {
   const tabInfo = await getCurrentTabInfo();
-  await loadTabMetadata(tabInfo.url);
+  await loadTabMetadata(tabInfo.url, true);
 });
 
 browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
@@ -92,5 +92,5 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     return;
   }
 
-  await loadTabMetadata(tab.url);
+  await loadTabMetadata(tab.url, true);
 });

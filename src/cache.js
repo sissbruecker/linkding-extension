@@ -4,7 +4,7 @@ import { LinkdingApi } from "./linkding";
 
 const TAB_METADATA_CACHE_KEY = "ld_tab_metadata_cache";
 
-export async function loadTabMetadata(url) {
+export async function loadTabMetadata(url, precacheRequest = false) {
   const configuration = await getConfiguration();
   const hasCompleteConfiguration = isConfigurationComplete(configuration);
 
@@ -19,19 +19,24 @@ export async function loadTabMetadata(url) {
     return cachedMetadata;
   }
 
-  // Load metadata if not cached
-  const api = new LinkdingApi(configuration);
-  try {
-    const tabMetadata = await api.check(url);
-    // Linkding <v1.17 does not return full bookmark data from check API
-    // In that case fetch the bookmark with a separate request
-    if (tabMetadata.bookmark && !tabMetadata.bookmark.date_added) {
-      tabMetadata.bookmark = await api.getBookmark(tabMetadata.bookmark.id);
+  if (configuration.precacheEnabled || !precacheRequest) {
+    // Load metadata if not cached
+    const api = new LinkdingApi(configuration);
+    try {
+      const tabMetadata = await api.check(url);
+      // Linkding <v1.17 does not return full bookmark data from check API
+      // In that case fetch the bookmark with a separate request
+      if (tabMetadata.bookmark && !tabMetadata.bookmark.date_added) {
+        tabMetadata.bookmark = await api.getBookmark(tabMetadata.bookmark.id);
+      }
+      await cacheTabMetadata(tabMetadata);
+      return tabMetadata;
+    } catch (e) {
+      console.error(e);
+      return null;
     }
-    await cacheTabMetadata(tabMetadata);
-    return tabMetadata;
-  } catch (e) {
-    console.error(e);
+  }
+  else {
     return null;
   }
 }
