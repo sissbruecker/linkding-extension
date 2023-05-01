@@ -5,6 +5,7 @@
   let baseUrl = "";
   let token = "";
   let default_tags = "";
+  let precacheEnabled = false;
   let isSuccess = false;
   let isError = false;
 
@@ -13,6 +14,7 @@
     baseUrl = config.baseUrl;
     token = config.token;
     default_tags = config.default_tags;
+    precacheEnabled = config.precacheEnabled;
   }
 
   init();
@@ -22,6 +24,7 @@
       baseUrl,
       token,
       default_tags,
+      precacheEnabled,
     };
 
     const testResult = await new LinkdingApi(config).testConnection(config);
@@ -62,6 +65,21 @@
     <input class="form-input" type="text" id="input-default-tags" placeholder="" bind:value={default_tags}>
     <div class="form-input-hint">
       Set of tags that should be added to new bookmarks by default.
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="form-checkbox">
+      <input type="checkbox" bind:checked={precacheEnabled}>
+      <i class="form-icon"></i>
+      <span>Pre-load page information while browsing</span>
+    </label>
+    <div class="form-input-hint">
+      Pre-loads the page title and description while browsing, so that these are already available when opening the add
+      bookmark popup. Otherwise the page title and description will be fetched after opening popup, which can take a
+      moment for them to show up.
+      <br>
+      <strong>Note:</strong> This will send the URL of all websites that you visit to your Linkding server, which will
+      also be stored in the server logs.
     </div>
   </div>
   <div class="divider"></div>

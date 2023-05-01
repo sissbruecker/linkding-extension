@@ -5,6 +5,7 @@ const DEFAULTS = {
   baseUrl: "",
   token: "",
   default_tags: "",
+  precacheEnabled: false,
 };
 
 export async function getConfiguration() {
