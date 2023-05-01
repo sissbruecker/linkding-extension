@@ -71,10 +71,15 @@
     <label class="form-checkbox">
       <input type="checkbox" bind:checked={precacheEnabled}>
       <i class="form-icon"></i>
-      <span>Pre-fill page information in Add Bookmark window</span>
+      <span>Pre-load page information while browsing</span>
     </label>
     <div class="form-input-hint">
-     <strong>Note:</strong> This will send the URL of all tabs to your Linkding server as you browse.
+      Pre-loads the page title and description while browsing, so that these are already available when opening the add
+      bookmark popup. Otherwise the page title and description will be fetched after opening popup, which can take a
+      moment for them to show up.
+      <br>
+      <strong>Note:</strong> This will send the URL of all websites that you visit to your Linkding server, which will
+      also be stored in the server logs.
     </div>
   </div>
   <div class="divider"></div>
