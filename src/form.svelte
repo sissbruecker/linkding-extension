@@ -17,6 +17,7 @@
   let errorMessage = "";
   let availableTagNames = []
   let bookmarkExists = false;
+  let closeTimeout = 1000;
 
   $: {
     if (api && configuration) {
@@ -68,6 +69,9 @@
       await api.saveBookmark(bookmark);
       await clearCachedTabMetadata();
       saveState = "success";
+      setTimeout(() => {
+        window.close();
+      }, closeTimeout);
     } catch (e) {
       saveState = "error";
       errorMessage = e.toString();
