@@ -11,12 +11,14 @@
   let titlePlaceholder = "";
   let descriptionPlaceholder = "";
   let description = "";
+  let notes = "";
   let tags = "";
   let unread = false;
   let saveState = "";
   let errorMessage = "";
   let availableTagNames = []
   let bookmarkExists = false;
+  let editNotes = false;
 
   $: {
     if (api && configuration) {
@@ -49,6 +51,7 @@
       title = existingBookmark.title;
       tags = existingBookmark.tag_names ? existingBookmark.tag_names.join(" ") : "";
       description = existingBookmark.description;
+      notes = existingBookmark.notes;
       unread = existingBookmark.unread;
     }
   }
@@ -59,6 +62,7 @@
       url,
       title,
       description,
+      notes,
       tag_names: tagNames,
       unread,
     };
@@ -77,6 +81,10 @@
 
   function handleOptions() {
     openOptions();
+  }
+
+  function toggleNotes() {
+    editNotes = !editNotes;
   }
 
 </script>
@@ -107,10 +115,24 @@
            bind:value={title} placeholder={titlePlaceholder}>
   </div>
   <div class="form-group">
-    <label class="form-label label-sm" for="input-description">Description</label>
-    <textarea class="form-input input-sm" id="input-description"
-              bind:value={description}
-              placeholder={descriptionPlaceholder}></textarea>
+    {#if !editNotes}
+      <div class="form-label-row">
+        <label class="form-label label-sm" for="input-description">Description</label>
+        <button type="button" class="btn btn-link btn-sm" on:click|preventDefault={toggleNotes}>Edit notes</button>
+      </div>
+      <textarea class="form-input input-sm" id="input-description"
+                bind:value={description}
+                placeholder={descriptionPlaceholder}></textarea>
+    {/if}
+    {#if editNotes}
+      <div class="form-label-row">
+        <label class="form-label label-sm" for="input-notes">Notes</label>
+        <button type="button" class="btn btn-link btn-sm" on:click|preventDefault={toggleNotes}>Edit description
+        </button>
+      </div>
+      <textarea class="form-input input-sm" id="input-notes" rows="5"
+                bind:value={notes}></textarea>
+    {/if}
   </div>
   <div class="form-group">
     <label class="form-checkbox">
@@ -146,6 +168,11 @@
         display: flex;
         justify-content: space-between;
         align-items: baseline;
+    }
+
+    .form-label-row {
+        display: flex;
+        justify-content: space-between;
     }
 
     .button-row {
