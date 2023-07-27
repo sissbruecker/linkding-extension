@@ -90,7 +90,9 @@
 </script>
 <div class="title-row">
   <h6>{bookmarkExists ? "Edit Bookmark" : "Add bookmark"}</h6>
-  <a href="#" on:click|preventDefault={handleOptions}>Options</a>
+  <div class="options" on:keypress={handleOptions} on:click|preventDefault={handleOptions} role="button" tabindex="0">
+    <i class="icon icon-menu"></i>
+  </div>
 </div>
 <div class="divider"></div>
 <form class="form" on:submit|preventDefault={handleSubmit}>
@@ -168,6 +170,10 @@
         display: flex;
         justify-content: space-between;
         align-items: baseline;
+    }
+
+    .options {
+      cursor: pointer;
     }
 
     .form-label-row {

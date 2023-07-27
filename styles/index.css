@@ -2,3 +2,29 @@ body {
     padding: 16px;
     min-width: 400px;
 }
+
+@media (prefers-color-scheme: dark) {
+    body {
+        background: #303742;
+        color: #fff;
+    }
+
+    .modal:target .modal-overlay,
+    .modal.active .modal-overlay {
+        background: rgba(48, 55, 66, 0.75);
+    }
+
+    .modal-container {
+        background: #303742;
+        color: #fff;
+    }
+
+    .form-input {
+        background: #414a59;
+        color: #fff;
+    }
+
+    .form-checkbox .form-icon {
+        background: #414a59;
+    }
+}
