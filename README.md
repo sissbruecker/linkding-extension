@@ -50,4 +50,4 @@ The script does:
 
 After the build the root directory contains the complete, unpackaged extension. Use the `manifest.json` file to load it manually into the browser.
 
-The packaged extension can be found in the `web-ext-artifacts` folder.
+The packaged extension can be found in the `artifacts` folder.

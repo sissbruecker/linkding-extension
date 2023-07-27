@@ -26,6 +26,7 @@
     "browser_style": false
   },
   "permissions": [
-    "tabs"
+    "tabs",
+    "storage"
   ]
 }

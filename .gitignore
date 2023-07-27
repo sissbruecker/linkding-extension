@@ -122,7 +122,7 @@ dist
 .idea
 *.iml
 /build
-/web-ext-artifacts
+/artifacts
 .web-extension-id
 .DS_Store
 manifest.json
