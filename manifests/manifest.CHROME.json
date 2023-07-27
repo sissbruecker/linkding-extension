@@ -1,6 +1,10 @@
 {
    "background": {
 		"service_worker": "build/background.js",
-      "persistent": true
-	}
+      "type": "module"
+	},
+   "optional_host_permissions": [
+		"http://*/*",
+		"https://*/*"
+	]
 }

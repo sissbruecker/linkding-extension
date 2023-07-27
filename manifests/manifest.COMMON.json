@@ -21,23 +21,11 @@
     "default_title": "Add bookmark",
     "default_popup": "popup/index.html"
   },
-  "commands": {
-    "_execute_browser_action": {
-      "suggested_key": {
-        "default": "Alt+Shift+L"
-      },
-      "description": "Open a popup to bookmark current page."
-    }
-  },
   "options_ui": {
     "page": "options/index.html",
     "browser_style": false
   },
   "permissions": [
     "tabs"
-  ],
-  "optional_permissions": [
-    "http://*/*",
-    "https://*/*"
   ]
 }

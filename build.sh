@@ -17,8 +17,6 @@ npx web-ext build --overwrite-dest --artifacts-dir web-ext-artifacts/firefox --i
 # Build manifest file for Chrome
 jq -s '.[0] * .[1]' manifests/manifest.COMMON.json manifests/manifest.CHROME.json > manifest.json
 
-# Lint extension, while excluding dev files
-npx web-ext lint --ignore-files .idea dist docs src web-ext-artifacts .gitignore *.sh *.iml *.js *.lock
 # Build extension, while excluding dev files
 npx web-ext build --overwrite-dest --artifacts-dir web-ext-artifacts/chrome --ignore-files .idea dist docs src web-ext-artifacts .gitignore *.sh *.iml *.js *.lock
 
