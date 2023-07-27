@@ -38,16 +38,14 @@ Run the build as described below and then follow the instructions [here](https:/
 
 Internally, we use `web-ext` to bundle a distribution package for the extension for Firefox. You do not need to install `web-ext`. Note that `web-ext` will generate a zip file which can also be used for the Chrome Web Store.
 
-Then run the following bash script to generate a build (might need to make the file executable using `chmod +x build.sh`):
+Then generate a build (might need to make the file executable using `chmod +x build.sh`):
 ```
-./build.sh
+npm run build:ext
 ```
 
 The script does:
 - Install all dependencies using NPM
 - Runs rollup to transpile and minify source files, with output written to `build`
-- Run web-ext to package the extension for uploading to the Mozilla addon store
+- Packages the extension for uploading to the Chrome webstore and Mozilla addon store
 
-After the build the root directory contains the complete, unpackaged extension. Use the `manifest.json` file to load it manually into the browser.
-
-The packaged extension can be found in the `artifacts` folder.
+The unpackaged and packaged builds can be found in the `artifacts` folder.
