@@ -124,3 +124,5 @@ dist
 /build
 /web-ext-artifacts
 .web-extension-id
+.DS_Store
+manifest.json

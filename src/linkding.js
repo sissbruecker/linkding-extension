@@ -108,16 +108,27 @@ export class LinkdingApi {
 
   async testConnection() {
     const configuration = this.configuration;
-    return fetch(`${configuration.baseUrl}/api/bookmarks/?limit=1`, {
-      headers: {
-        Authorization: `Token ${configuration.token}`,
-      },
-    })
-      .then((response) =>
-        response.status === 200 ? response.json() : Promise.reject(response)
-      )
-      .then((body) => !!body.results)
-      .catch(() => false);
+
+    const granted = await chrome.permissions.request({
+      origins: [`${configuration.baseUrl}/*`]
+    });
+
+    if (granted) {
+      return fetch(`${configuration.baseUrl}/api/bookmarks/?limit=1`, {
+        headers: {
+          Authorization: `Token ${configuration.token}`,
+        },
+      })
+        .then((response) => {
+          return response.status === 200 ? response.json() : Promise.reject(response);
+        })
+        .then((body) => {
+          return !!body.results;
+        })
+        .catch(() => false);
+    } else {
+      return false
+    }
   }
 
   async findBookmarkByUrl(url) {

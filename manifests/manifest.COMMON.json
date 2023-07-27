@@ -1,34 +1,26 @@
 {
-  "manifest_version": 2,
-  "name": "linkding extension",
-  "version": "1.7",
+  "manifest_version": 3,
+  "name": "Linkding",
+  "version": "2.0",
   "description": "Companion extension for the linkding bookmark service",
   "homepage_url": "https://github.com/sissbruecker/linkding-extension/",
-
   "icons": {
     "48": "icons/logo_48x48.png",
     "96": "icons/logo_96x96.png",
     "128": "icons/logo_128x128.png"
   },
-
-  "background": {
-    "scripts": ["build/background.js"]
-  },
-
   "omnibox": {
     "keyword": "ld"
   },
-
-  "browser_action": {
+  "action": {
     "default_icon": {
       "19": "icons/button_19x19.png",
       "32": "icons/button_32x32.png",
       "38": "icons/button_38x38.png"
     },
-    "default_title": "Add bookmark (Alt+Shift+L)",
+    "default_title": "Add bookmark",
     "default_popup": "popup/index.html"
   },
-
   "commands": {
     "_execute_browser_action": {
       "suggested_key": {
@@ -37,13 +29,14 @@
       "description": "Open a popup to bookmark current page."
     }
   },
-
   "options_ui": {
-    "page": "options/index.html"
+    "page": "options/index.html",
+    "browser_style": false
   },
-
   "permissions": [
-    "tabs",
+    "tabs"
+  ],
+  "optional_permissions": [
     "http://*/*",
     "https://*/*"
   ]

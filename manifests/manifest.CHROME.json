@@ -1,0 +1,6 @@
+{
+   "background": {
+		"service_worker": "build/background.js",
+      "persistent": true
+	}
+}
