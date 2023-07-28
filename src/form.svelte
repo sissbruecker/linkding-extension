@@ -1,5 +1,5 @@
 <script>
-  import TagAutocomplete from './TagAutocomplete.svelte'
+  import TagAutocomplete from "./TagAutocomplete.svelte";
   import { getCurrentTabInfo, openOptions } from "./browser";
   import { loadTabMetadata, clearCachedTabMetadata } from "./cache";
 
@@ -16,7 +16,7 @@
   let unread = false;
   let saveState = "";
   let errorMessage = "";
-  let availableTagNames = []
+  let availableTagNames = [];
   let bookmarkExists = false;
   let editNotes = false;
 
@@ -30,8 +30,8 @@
     const tabInfo = await getCurrentTabInfo();
     url = tabInfo.url;
     tags = configuration.default_tags;
-    const availableTags = await api.getTags().catch(() => [])
-    availableTagNames = availableTags.map(tag => tag.name)
+    const availableTags = await api.getTags().catch(() => []);
+    availableTagNames = availableTags.map((tag) => tag.name);
 
     loadExistingBookmarkData();
   }
@@ -42,14 +42,16 @@
       return;
     }
 
-    titlePlaceholder = tabMetadata.metadata.title;
-    descriptionPlaceholder = tabMetadata.metadata.description;
+    titlePlaceholder = tabMetadata.metadata.title ?? "";
+    descriptionPlaceholder = tabMetadata.metadata.description ?? "";
 
     const existingBookmark = tabMetadata.bookmark;
     if (existingBookmark) {
       bookmarkExists = true;
       title = existingBookmark.title;
-      tags = existingBookmark.tag_names ? existingBookmark.tag_names.join(" ") : "";
+      tags = existingBookmark.tag_names
+        ? existingBookmark.tag_names.join(" ")
+        : "";
       description = existingBookmark.description;
       notes = existingBookmark.notes;
       unread = existingBookmark.unread;
@@ -57,11 +59,15 @@
   }
 
   async function handleSubmit() {
-    const tagNames = tags.split(" ").map(tag => tag.trim()).filter(tag => !!tag);
+    const tagNames = tags
+      .split(" ")
+      .map((tag) => tag.trim())
+      .filter((tag) => !!tag);
+
     const bookmark = {
       url,
-      title,
-      description,
+      title: title || titlePlaceholder,
+      description: description || descriptionPlaceholder,
       notes,
       tag_names: tagNames,
       unread,
@@ -72,6 +78,14 @@
       await api.saveBookmark(bookmark);
       await clearCachedTabMetadata();
       saveState = "success";
+
+      title = bookmark.title;
+      description = bookmark.description;
+
+      bookmarkExists = true;
+      window.setTimeout(() => {
+        saveState = "";
+      }, 1750);
     } catch (e) {
       saveState = "error";
       errorMessage = e.toString();
@@ -86,117 +100,161 @@
   function toggleNotes() {
     editNotes = !editNotes;
   }
-
 </script>
+
 <div class="title-row">
   <h6>{bookmarkExists ? "Edit Bookmark" : "Add bookmark"}</h6>
-  <div class="options" on:keypress={handleOptions} on:click|preventDefault={handleOptions} role="button" tabindex="0">
-    <i class="icon icon-menu"></i>
+  <div
+    class="options"
+    on:keypress={handleOptions}
+    on:click|preventDefault={handleOptions}
+    role="button"
+    tabindex="0"
+  >
+    <i class="icon icon-menu" />
   </div>
 </div>
-<div class="divider"></div>
+<div class="divider" />
 <form class="form" on:submit|preventDefault={handleSubmit}>
   <div class="form-group">
     <label class="form-label label-sm" for="input-url">URL</label>
-    <input class="form-input input-sm" type="text" id="input-url" placeholder="URL"
-           bind:value={url}>
-    {#if bookmarkExists}
-      <div class="form-input-hint bookmark-exists">
-        This URL is already bookmarked. The form has been prefilled from the existing bookmark, and saving the form will
-        update the existing bookmark.
-      </div>
-    {/if}
+    <input
+      class="form-input input-sm"
+      type="text"
+      id="input-url"
+      placeholder="URL"
+      bind:value={url}
+    />
   </div>
   <div class="form-group">
     <label class="form-label label-sm" for="input-tags">Tags</label>
-    <TagAutocomplete id="input-tags" name="tags" bind:value={tags} tags={availableTagNames}/>
+    <TagAutocomplete
+      id="input-tags"
+      name="tags"
+      bind:value={tags}
+      tags={availableTagNames}
+    />
   </div>
   <div class="form-group">
     <label class="form-label label-sm" for="input-title">Title</label>
-    <input class="form-input input-sm" type="text" id="input-title"
-           bind:value={title} placeholder={titlePlaceholder}>
+    <input
+      class="form-input input-sm"
+      type="text"
+      id="input-title"
+      bind:value={title}
+      placeholder={titlePlaceholder}
+    />
   </div>
   <div class="form-group">
     {#if !editNotes}
       <div class="form-label-row">
-        <label class="form-label label-sm" for="input-description">Description</label>
-        <button type="button" class="btn btn-link btn-sm" on:click|preventDefault={toggleNotes}>Edit notes</button>
+        <label class="form-label label-sm" for="input-description"
+          >Description</label
+        >
+        <button
+          type="button"
+          class="btn btn-link btn-sm"
+          on:click|preventDefault={toggleNotes}>Edit notes</button
+        >
       </div>
-      <textarea class="form-input input-sm" id="input-description"
-                bind:value={description}
-                placeholder={descriptionPlaceholder}></textarea>
+      <textarea
+        class="form-input input-sm"
+        id="input-description"
+        bind:value={description}
+        placeholder={descriptionPlaceholder}
+      />
     {/if}
     {#if editNotes}
       <div class="form-label-row">
         <label class="form-label label-sm" for="input-notes">Notes</label>
-        <button type="button" class="btn btn-link btn-sm" on:click|preventDefault={toggleNotes}>Edit description
+        <button
+          type="button"
+          class="btn btn-link btn-sm"
+          on:click|preventDefault={toggleNotes}
+          >Edit description
         </button>
       </div>
-      <textarea class="form-input input-sm" id="input-notes" rows="5"
-                bind:value={notes}></textarea>
+      <textarea
+        class="form-input input-sm"
+        id="input-notes"
+        rows="5"
+        bind:value={notes}
+      />
     {/if}
   </div>
   <div class="form-group">
     <label class="form-checkbox">
-      <input type="checkbox" bind:checked={unread}>
-      <i class="form-icon"></i>
+      <input type="checkbox" bind:checked={unread} />
+      <i class="form-icon" />
       <span class="text-small">Mark as unread</span>
     </label>
   </div>
-  <div class="divider"></div>
-  {#if saveState === 'success'}
+  <div class="divider" />
+  {#if saveState === "success"}
     <div class="form-group has-success result-row">
-      <div class="form-input-hint"><i class="icon icon-check"></i> Bookmark saved</div>
+      <div class="form-input-hint">
+        <i class="icon icon-check" /> Bookmark saved
+      </div>
     </div>
   {/if}
-  {#if saveState === 'error'}
+  {#if saveState === "error"}
     <div class="form-group has-error result-row">
       <div class="form-input-hint">Error saving bookmark: {errorMessage}</div>
     </div>
   {/if}
-  {#if saveState !== 'success'}
+  {#if saveState !== "success"}
     <div class="button-row">
-      <button type="submit" class="btn btn-primary" class:loading={saveState === 'loading'}>Save</button>
+      <button
+        type="submit"
+        class="btn btn-primary"
+        class:loading={saveState === "loading"}
+      >
+        {#if bookmarkExists}
+          Update
+        {:else}
+          Save
+        {/if}
+      </button>
     </div>
   {/if}
 </form>
 
 <style>
-    form {
-        max-width: 400px;
-    }
+  form {
+    max-width: 400px;
+  }
 
-    .title-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-    }
+  .title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
 
-    .options {
-      cursor: pointer;
-    }
+  .options {
+    cursor: pointer;
+  }
 
-    .form-label-row {
-        display: flex;
-        justify-content: space-between;
-    }
+  .form-label-row {
+    display: flex;
+    justify-content: space-between;
+  }
 
-    .button-row {
-        display: flex;
-        justify-content: flex-end;
-    }
+  .button-row {
+    display: flex;
+    justify-content: flex-end;
+  }
 
-    .button-row button {
-        padding-left: 32px;
-        padding-right: 32px;
-    }
+  .button-row button {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
 
-    .result-row {
-        display: flex;
-        justify-content: center;
-    }
+  .result-row {
+    display: flex;
+    justify-content: center;
+  }
 
-    .bookmark-exists {
-        color: #ffb700;
-    }
+  .bookmark-exists {
+    color: #ffb700;
+  }
 </style>
