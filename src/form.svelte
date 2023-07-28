@@ -35,6 +35,14 @@
     const tabInfo = await getCurrentTabInfo();
     url = tabInfo.url;
 
+    const highlightedText = await chrome.scripting.executeScript({
+      target: { tabId : tabInfo.id },
+      func: () => window.getSelection().toString(),
+    });
+    if (highlightedText?.[0]?.result) {
+      notes = highlightedText[0].result;
+    }
+
     tags = configuration.default_tags;
     const availableTags = await api.getTags().catch(() => []);
     availableTagNames = availableTags.map((tag) => tag.name);
@@ -310,7 +318,7 @@
   }
 
   .delete-button {
-    color: #ff0000;
+    color: #e05a5b;
     cursor: pointer;
   }
 

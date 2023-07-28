@@ -37,6 +37,8 @@
     "tabs",
     "storage",
     "contextMenus",
-    "notifications"
+    "notifications",
+    "scripting",
+    "activeTab"
   ]
 }

@@ -144,10 +144,12 @@ async function saveToLinkding(info, tab) {
   }
 }
 
-chrome.contextMenus.create({
-  id: "save-to-linkding",
-  title: "Save bookmark",
-  contexts: ["link"],
+chrome.contextMenus.removeAll(() => {
+  chrome.contextMenus.create({
+    id: "save-to-linkding",
+    title: "Save bookmark",
+    contexts: ["link"],
+  });
 });
 
 chrome.contextMenus.onClicked.addListener(saveToLinkding);
