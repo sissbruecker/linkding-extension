@@ -1,6 +1,11 @@
 <script>
   import TagAutocomplete from "./TagAutocomplete.svelte";
-  import { getCurrentTabInfo, openOptions, setStarredBadge, resetStarredBadge } from "./browser";
+  import {
+    getCurrentTabInfo,
+    openOptions,
+    setStarredBadge,
+    resetStarredBadge,
+  } from "./browser";
   import { loadTabMetadata, clearCachedTabMetadata } from "./cache";
 
   export let api;
@@ -109,14 +114,19 @@
 
 <div class="title-row">
   <h6>{bookmarkExists ? "Edit Bookmark" : "Add bookmark"}</h6>
-  <div
-    class="options"
-    on:keypress={handleOptions}
-    on:click|preventDefault={handleOptions}
-    role="button"
-    tabindex="0"
-  >
-    <i class="icon icon-menu" />
+  <div>
+    <a class="options" href={`${configuration?.baseUrl}/bookmarks`} target="_blank" role="button" tabindex="0">
+      <i class="icon icon-share" />
+    </a>
+    <div
+      class="options"
+      on:keypress={handleOptions}
+      on:click|preventDefault={handleOptions}
+      role="button"
+      tabindex="0"
+    >
+      <i class="icon icon-menu" />
+    </div>
   </div>
 </div>
 <div class="divider" />
@@ -208,7 +218,7 @@
     </div>
   {/if}
   {#if saveState !== "success"}
-    <div class="button-row">
+    <div class="button-row">goa
       <button
         type="submit"
         class="btn btn-primary"
@@ -236,6 +246,7 @@
   }
 
   .options {
+    color: #fff;
     cursor: pointer;
   }
 
