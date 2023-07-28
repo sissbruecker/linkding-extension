@@ -6,14 +6,11 @@ export class LinkdingApi {
   async getBookmark(bookmarkId) {
     const configuration = this.configuration;
 
-    return fetch(
-      `${configuration.baseUrl}/api/bookmarks/${bookmarkId}/`,
-      {
-        headers: {
-          Authorization: `Token ${configuration.token}`,
-        },
-      }
-    ).then((response) => {
+    return fetch(`${configuration.baseUrl}/api/bookmarks/${bookmarkId}/`, {
+      headers: {
+        Authorization: `Token ${configuration.token}`,
+      },
+    }).then((response) => {
       if (response.status === 200) {
         return response.json();
       }
@@ -51,21 +48,16 @@ export class LinkdingApi {
   async deleteBookmark(bookmarkId) {
     const configuration = this.configuration;
 
-    return fetch(
-      `${configuration.baseUrl}/api/bookmarks/${bookmarkId}/`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Token ${configuration.token}`,
-        },
-      }
-    ).then((response) => {
+    return fetch(`${configuration.baseUrl}/api/bookmarks/${bookmarkId}/`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Token ${configuration.token}`,
+      },
+    }).then((response) => {
       if (response.status === 204) {
         return true;
       }
-      return Promise.reject(
-        `Error deleting bookmark: ${response.statusText}`
-      );
+      return Promise.reject(`Error deleting bookmark: ${response.statusText}`);
     });
   }
 
@@ -110,14 +102,11 @@ export class LinkdingApi {
     const configuration = this.configuration;
     url = encodeURIComponent(url);
 
-    return fetch(
-      `${configuration.baseUrl}/api/bookmarks/check/?url=${url}`,
-      {
-        headers: {
-          Authorization: `Token ${configuration.token}`,
-        },
-      }
-    ).then((response) => {
+    return fetch(`${configuration.baseUrl}/api/bookmarks/check/?url=${url}`, {
+      headers: {
+        Authorization: `Token ${configuration.token}`,
+      },
+    }).then((response) => {
       if (response.status === 200) {
         return response.json();
       }
@@ -131,7 +120,7 @@ export class LinkdingApi {
     const configuration = this.configuration;
 
     const granted = await chrome.permissions.request({
-      origins: [`${configuration.baseUrl}/*`]
+      origins: [`${configuration.baseUrl}/*`],
     });
 
     if (granted) {
@@ -141,14 +130,16 @@ export class LinkdingApi {
         },
       })
         .then((response) => {
-          return response.status === 200 ? response.json() : Promise.reject(response);
+          return response.status === 200
+            ? response.json()
+            : Promise.reject(response);
         })
         .then((body) => {
           return !!body.results;
         })
         .catch(() => false);
     } else {
-      return false
+      return false;
     }
   }
 
