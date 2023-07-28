@@ -22,7 +22,7 @@
   let saveState = "";
   let errorMessage = "";
   let availableTagNames = [];
-  let bookmarkExists = false;
+  let bookmarkId = null;
   let editNotes = false;
 
   $: {
@@ -53,7 +53,7 @@
 
     const existingBookmark = tabMetadata.bookmark;
     if (existingBookmark) {
-      bookmarkExists = true;
+      bookmarkId = existingBookmark.id;
       title = existingBookmark.title;
       tags = existingBookmark.tag_names
         ? existingBookmark.tag_names.join(" ")
@@ -81,14 +81,13 @@
 
     try {
       saveState = "loading";
-      await api.saveBookmark(bookmark);
+      const newBookmark = await api.saveBookmark(bookmark);
       await clearCachedTabMetadata();
       saveState = "success";
 
-      title = bookmark.title;
-      description = bookmark.description;
-
-      bookmarkExists = true;
+      title = newBookmark.title;
+      description = newBookmark.description;
+      bookmarkId = newBookmark.id;
 
       const tabInfo = await getCurrentTabInfo();
       setStarredBadge(tabInfo.id);
@@ -107,19 +106,45 @@
     openOptions();
   }
 
+  async function handleDelete() {
+    if (!bookmarkId) return;
+    if (!confirm("Are you sure you want to delete this bookmark?")) {
+      return;
+    }
+
+    try {
+      await api.deleteBookmark(bookmarkId);
+      await clearCachedTabMetadata();
+
+      bookmarkId = null;
+      const tabInfo = await getCurrentTabInfo();
+      resetStarredBadge(tabInfo.id);
+    } catch (e) {
+      saveState = "error";
+      errorMessage = e.toString();
+      console.error(errorMessage);
+    }
+  }
+
   function toggleNotes() {
     editNotes = !editNotes;
   }
 </script>
 
 <div class="title-row">
-  <h6>{bookmarkExists ? "Edit Bookmark" : "Add bookmark"}</h6>
-  <div>
-    <a class="options" href={`${configuration?.baseUrl}/bookmarks`} target="_blank" role="button" tabindex="0">
+  <div><b>{bookmarkId ? "Edit Bookmark" : "Add bookmark"}</b></div>
+  <div class="title-actions">
+    <a
+      class="title-action"
+      href={`${configuration?.baseUrl}/bookmarks`}
+      target="_blank"
+      role="button"
+      tabindex="0"
+    >
       <i class="icon icon-share" />
     </a>
     <div
-      class="options"
+      class="title-action"
       on:keypress={handleOptions}
       on:click|preventDefault={handleOptions}
       role="button"
@@ -214,17 +239,28 @@
   {/if}
   {#if saveState === "error"}
     <div class="form-group has-error result-row">
-      <div class="form-input-hint">Error saving bookmark: {errorMessage}</div>
+      <div class="form-input-hint">{errorMessage}</div>
     </div>
   {/if}
   {#if saveState !== "success"}
-    <div class="button-row">goa
+    <div class="button-row">
+      {#if bookmarkId}
+        <div
+          class="delete-button"
+          on:keypress={handleDelete}
+          on:click|preventDefault={handleDelete}
+          role="button"
+          tabindex="0"
+        >
+          <i class="icon icon-delete" />
+        </div>
+      {/if}
       <button
         type="submit"
         class="btn btn-primary"
         class:loading={saveState === "loading"}
       >
-        {#if bookmarkExists}
+        {#if bookmarkId}
           Update
         {:else}
           Save
@@ -242,12 +278,18 @@
   .title-row {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
   }
 
-  .options {
+  .title-actions {
+    display: flex;
+    align-items: center;
+  }
+
+  .title-action {
     color: #fff;
     cursor: pointer;
+    margin-left: 0.75rem;
   }
 
   .form-label-row {
@@ -257,12 +299,19 @@
 
   .button-row {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .button-row button {
     padding-left: 32px;
     padding-right: 32px;
+    margin-left: auto;
+  }
+
+  .delete-button {
+    color: #ff0000;
+    cursor: pointer;
   }
 
   .result-row {

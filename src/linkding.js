@@ -48,6 +48,27 @@ export class LinkdingApi {
     });
   }
 
+  async deleteBookmark(bookmarkId) {
+    const configuration = this.configuration;
+
+    return fetch(
+      `${configuration.baseUrl}/api/bookmarks/${bookmarkId}/`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Token ${configuration.token}`,
+        },
+      }
+    ).then((response) => {
+      if (response.status === 204) {
+        return true;
+      }
+      return Promise.reject(
+        `Error deleting bookmark: ${response.statusText}`
+      );
+    });
+  }
+
   async getTags() {
     const configuration = this.configuration;
 
