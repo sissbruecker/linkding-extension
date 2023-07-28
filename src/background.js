@@ -1,4 +1,4 @@
-import { getBrowser, getCurrentTabInfo } from "./browser";
+import { getBrowser, getCurrentTabInfo, setStarredBadge, resetStarredBadge } from "./browser";
 import { loadTabMetadata, clearCachedTabMetadata } from "./cache";
 import { getConfiguration, isConfigurationComplete } from "./configuration";
 import { LinkdingApi } from "./linkding";
@@ -146,8 +146,20 @@ async function saveToLinkding(info, tab) {
 
 chrome.contextMenus.create({
   id: "save-to-linkding",
-  title: "Save to Linkding",
+  title: "Save bookmark",
   contexts: ["link"],
 });
 
 chrome.contextMenus.onClicked.addListener(saveToLinkding);
+
+/* Dynamic badge */
+
+chrome.tabs.onActivated.addListener(async (activeInfo) => {
+  const tab = await chrome.tabs.get(activeInfo.tabId);
+  const tabMetadata = await loadTabMetadata(tab.url);
+  if (tabMetadata?.bookmark) {
+    setStarredBadge(tab.id);
+  } else if (chrome.action.getBadgeText({ tabId: tab.id }) === "★") {
+    resetStarredBadge(tab.id);
+  }
+});

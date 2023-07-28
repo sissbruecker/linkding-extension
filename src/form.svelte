@@ -1,6 +1,6 @@
 <script>
   import TagAutocomplete from "./TagAutocomplete.svelte";
-  import { getCurrentTabInfo, openOptions } from "./browser";
+  import { getCurrentTabInfo, openOptions, setStarredBadge, resetStarredBadge } from "./browser";
   import { loadTabMetadata, clearCachedTabMetadata } from "./cache";
 
   export let api;
@@ -29,6 +29,7 @@
   async function init() {
     const tabInfo = await getCurrentTabInfo();
     url = tabInfo.url;
+
     tags = configuration.default_tags;
     const availableTags = await api.getTags().catch(() => []);
     availableTagNames = availableTags.map((tag) => tag.name);
@@ -83,6 +84,10 @@
       description = bookmark.description;
 
       bookmarkExists = true;
+
+      const tabInfo = await getCurrentTabInfo();
+      setStarredBadge(tabInfo.id);
+
       window.setTimeout(() => {
         saveState = "";
       }, 1750);
@@ -252,9 +257,5 @@
   .result-row {
     display: flex;
     justify-content: center;
-  }
-
-  .bookmark-exists {
-    color: #ffb700;
   }
 </style>
