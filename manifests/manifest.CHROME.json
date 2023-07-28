@@ -1,9 +1,9 @@
 {
-   "background": {
+	"background": {
 		"service_worker": "build/background.js",
-      "type": "module"
+		"type": "module"
 	},
-   "optional_host_permissions": [
+	"optional_host_permissions": [
 		"http://*/*",
 		"https://*/*"
 	]

@@ -104,12 +104,14 @@ async function saveToLinkding(info, tab) {
   const urlMetadata = await loadTabMetadata(info.linkUrl);
   if (!urlMetadata) return;
 
+  // Check if bookmark already exists
   if (urlMetadata.bookmark) {
     chrome.notifications.create("linkding-bookmark-exists", {
       type: "basic",
       iconUrl: chrome.runtime.getURL("/icons/logo_48x48.png"),
       title: "Linkding",
       message: `Bookmark already saved`,
+      silent: true, // Prevents notification sound
     });
     return;
   }
@@ -137,13 +139,14 @@ async function saveToLinkding(info, tab) {
       iconUrl: chrome.runtime.getURL("/icons/logo_48x48.png"),
       title: "Linkding",
       message: `Saved bookmark "${bookmark.title}"`,
-      silent: true,
+      silent: true, // Prevents notification sound
     });
   } catch (e) {
     console.error(e);
   }
 }
 
+// Removing all context menu items first is safer to avoid duplicates
 chrome.contextMenus.removeAll(() => {
   chrome.contextMenus.create({
     id: "save-to-linkding",
@@ -156,12 +159,17 @@ chrome.contextMenus.onClicked.addListener(saveToLinkding);
 
 /* Dynamic badge */
 
+// Set the badge when the tab is created/changed/focused
 chrome.tabs.onActivated.addListener(async (activeInfo) => {
   const tab = await chrome.tabs.get(activeInfo.tabId);
   const tabMetadata = await loadTabMetadata(tab.url);
   if (tabMetadata?.bookmark) {
     setStarredBadge(tab.id);
-  } else if (chrome.action.getBadgeText({ tabId: tab.id }) === "★") {
+    return;
+  }
+  
+  // Reset badge if tab is not bookmarked
+  if (chrome.action.getBadgeText({ tabId: tab.id }) === "★") {
     resetStarredBadge(tab.id);
   }
 });

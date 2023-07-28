@@ -35,11 +35,13 @@
     const tabInfo = await getCurrentTabInfo();
     url = tabInfo.url;
 
+    // Detect highlighted text
     const highlightedText = await chrome.scripting.executeScript({
       target: { tabId : tabInfo.id },
       func: () => window.getSelection().toString(),
     });
     if (highlightedText?.[0]?.result) {
+      // If there is highlighted text, use it as the notes
       notes = highlightedText[0].result;
     }
 
@@ -93,6 +95,7 @@
       await clearCachedTabMetadata();
       saveState = "success";
 
+      // Update the bookmark ID and title in case the user wants to edit it
       title = newBookmark.title;
       description = newBookmark.description;
       bookmarkId = newBookmark.id;
@@ -100,6 +103,7 @@
       const tabInfo = await getCurrentTabInfo();
       setStarredBadge(tabInfo.id);
 
+      // Reset the success message after a few seconds
       window.setTimeout(() => {
         saveState = "";
       }, 1750);

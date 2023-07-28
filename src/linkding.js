@@ -119,6 +119,7 @@ export class LinkdingApi {
   async testConnection() {
     const configuration = this.configuration;
 
+    // Request permission to access the page that runs Linkding
     const granted = await chrome.permissions.request({
       origins: [`${configuration.baseUrl}/*`],
     });
