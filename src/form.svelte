@@ -1,7 +1,7 @@
 <script>
   import TagAutocomplete from './TagAutocomplete.svelte'
-  import {getCurrentTabInfo, openOptions} from "./browser";
-  import {loadTabMetadata, clearCachedTabMetadata} from "./cache";
+  import { getCurrentTabInfo, openOptions } from "./browser";
+  import { loadTabMetadata, clearCachedTabMetadata } from "./cache";
 
   export let api;
   export let configuration;

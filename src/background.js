@@ -1,5 +1,5 @@
 import { getBrowser, getCurrentTabInfo } from "./browser";
-import { loadTabMetadata } from "./cache";
+import { loadTabMetadata, clearCachedTabMetadata } from "./cache";
 import { getConfiguration, isConfigurationComplete } from "./configuration";
 import { LinkdingApi } from "./linkding";
 
@@ -94,3 +94,60 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 
   await loadTabMetadata(tab.url, true);
 });
+
+/* Context menu integration */
+
+async function saveToLinkding(info, tab) {
+  const isReady = await initApi();
+  if (!isReady) return;
+
+  const urlMetadata = await loadTabMetadata(info.linkUrl);
+  if (!urlMetadata) return;
+
+  if (urlMetadata.bookmark) {
+    chrome.notifications.create("linkding-bookmark-exists", {
+      type: "basic",
+      iconUrl: chrome.runtime.getURL("/icons/logo_48x48.png"),
+      title: "Linkding",
+      message: `Bookmark already saved`,
+    });
+    return;
+  }
+
+  const { description, title, url } = urlMetadata.metadata;
+  const tagNames =
+    api.default_tags
+      ?.split(" ")
+      .map((tag) => tag.trim())
+      .filter((tag) => !!tag) ?? [];
+
+  const bookmark = {
+    url,
+    title: title ?? "",
+    description: description ?? "",
+    tag_names: tagNames,
+  };
+
+  try {
+    await api.saveBookmark(bookmark);
+    await clearCachedTabMetadata();
+
+    chrome.notifications.create("linkding-bookmark-saved", {
+      type: "basic",
+      iconUrl: chrome.runtime.getURL("/icons/logo_48x48.png"),
+      title: "Linkding",
+      message: `Saved bookmark "${bookmark.title}"`,
+      silent: true,
+    });
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+chrome.contextMenus.create({
+  id: "save-to-linkding",
+  title: "Save to Linkding",
+  contexts: ["link"],
+});
+
+chrome.contextMenus.onClicked.addListener(saveToLinkding);
