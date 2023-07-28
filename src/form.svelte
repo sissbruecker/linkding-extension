@@ -5,6 +5,7 @@
     openOptions,
     setStarredBadge,
     resetStarredBadge,
+    browserAPI,
   } from "./browser";
   import { loadTabMetadata, clearCachedTabMetadata } from "./cache";
 
@@ -36,8 +37,8 @@
     url = tabInfo.url;
 
     // Detect highlighted text
-    const highlightedText = await chrome.scripting.executeScript({
-      target: { tabId : tabInfo.id },
+    const highlightedText = await browserAPI.scripting.executeScript({
+      target: { tabId: tabInfo.id },
       func: () => window.getSelection().toString(),
     });
     if (highlightedText?.[0]?.result) {

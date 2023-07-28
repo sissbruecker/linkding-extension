@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Update dependencies
-npm install
+# npm install
 
 # Run rollup build
 npm run build

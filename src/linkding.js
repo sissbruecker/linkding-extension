@@ -1,3 +1,5 @@
+import { browserAPI } from "./browser";
+
 export class LinkdingApi {
   constructor(configuration) {
     this.configuration = configuration;
@@ -120,7 +122,7 @@ export class LinkdingApi {
     const configuration = this.configuration;
 
     // Request permission to access the page that runs Linkding
-    const granted = await chrome.permissions.request({
+    const granted = await browserAPI.permissions.request({
       origins: [`${configuration.baseUrl}/*`],
     });
 
