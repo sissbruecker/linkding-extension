@@ -1,10 +1,11 @@
-import svelte from 'rollup-plugin-svelte';
-import resolve from '@rollup/plugin-node-resolve';
-import terser from '@rollup/plugin-terser';
+const svelte = require('rollup-plugin-svelte');
+const resolve = require('@rollup/plugin-node-resolve');
+const commonjs = require('@rollup/plugin-commonjs');
+const terser = require('@rollup/plugin-terser');
 
 const production = !process.env.ROLLUP_WATCH;
 
-export default [
+module.exports = [
 	// Main bundle (browser action, options page)
 	{
 		input: 'src/index.js',
@@ -21,11 +22,14 @@ export default [
 
 			// If you have external dependencies installed from
 			// npm, you'll most likely need these plugins. In
-			// some cases you'll need additional configuration
+			// some cases you'll need additional configuration —
+			// consult the documentation for details:
+			// https://github.com/rollup/rollup-plugin-commonjs
 			resolve({
 				browser: true,
 				dedupe: importee => importee === 'svelte' || importee.startsWith('svelte/')
 			}),
+			commonjs(),
 
 			// If we're building for production (npm run build
 			// instead of npm run dev), minify
@@ -46,8 +50,11 @@ export default [
 		plugins: [
 			// If you have external dependencies installed from
 			// npm, you'll most likely need these plugins. In
-			// some cases you'll need additional configuration
+			// some cases you'll need additional configuration —
+			// consult the documentation for details:
+			// https://github.com/rollup/rollup-plugin-commonjs
 			resolve({ browser: true }),
+			commonjs(),
 
 			// If we're building for production (npm run build
 			// instead of npm run dev), minify

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "Linkding",
-  "version": "2.0.0",
+  "name": "linkding extension",
+  "version": "1.7.0",
   "description": "Companion extension for the linkding bookmark service",
   "homepage_url": "https://github.com/sissbruecker/linkding-extension/",
   "icons": {
@@ -18,7 +18,7 @@
       "32": "icons/button_32x32.png",
       "38": "icons/button_38x38.png"
     },
-    "default_title": "Add bookmark",
+    "default_title": "Add bookmark (Alt+Shift+L)",
     "default_popup": "popup/index.html"
   },
   "commands": {
@@ -36,5 +36,9 @@
   "permissions": [
     "tabs",
     "storage"
+  ],
+  "host_permissions": [
+    "https://*/*",
+    "http://*/*"
   ]
 }

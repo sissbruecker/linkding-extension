@@ -1,6 +1,6 @@
 {
   "name": "linkding-extension",
-  "version": "2.0.0",
+  "version": "1.7.0",
   "description": "Companion extension for the linkding bookmark service",
   "license": "MIT",
   "author": "Sascha Ißbrücker",
@@ -12,21 +12,25 @@
     "url": "https://github.com/sissbruecker/linkding-extension/issues"
   },
   "homepage": "https://github.com/sissbruecker/linkding-extension#readme",
-  "type": "module",
   "scripts": {
     "dev": "rollup -c -w",
+    "merge": "node ./manifests/merge.js",
+    "dev:chrome": "npm run merge chrome . && npm run dev",
+    "dev:firefox": "npm run merge firefox . && npm run dev",
     "build": "rollup -c",
-    "generate": "./build.sh"
+    "package": "./package.sh"
   },
   "dependencies": {
+    "@rollup/plugin-commonjs": "^25.0.3",
     "@rollup/plugin-node-resolve": "^15.1.0",
+    "@rollup/plugin-terser": "^0.4.3",
     "rollup": "^3.26.3",
     "rollup-plugin-svelte": "^7.1.6",
-    "@rollup/plugin-terser": "^0.4.3",
     "spectre.css": "^0.5.9",
     "svelte": "^4.1.1"
   },
   "devDependencies": {
+    "node-jq": "^2.3.5",
     "prettier": "^3.0.0",
     "web-ext": "^7.6.2"
   }

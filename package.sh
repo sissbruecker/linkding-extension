@@ -13,7 +13,7 @@ mkdir -p artifacts/firefox
 cp -r build icons options popup styles artifacts/firefox
 
 # Build manifest file for Firefox
-jq -s '.[0] * .[1]' manifests/manifest.COMMON.json manifests/manifest.FIREFOX.json > artifacts/firefox/manifest.json
+npm run merge firefox artifacts/firefox
 
 # Lint extension
 npx web-ext lint --source-dir artifacts/firefox
@@ -28,7 +28,7 @@ mkdir -p artifacts/chrome
 cp -r build icons options popup styles artifacts/chrome
 
 # Build manifest file
-jq -s '.[0] * .[1]' manifests/manifest.COMMON.json manifests/manifest.CHROME.json > artifacts/chrome/manifest.json
+npm run merge chrome artifacts/chrome
 
 # Build extension
 npx web-ext build --overwrite-dest --source-dir artifacts/chrome --artifacts-dir artifacts/chrome

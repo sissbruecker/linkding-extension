@@ -38,9 +38,9 @@ Run the build as described below and then follow the instructions [here](https:/
 
 Internally, we use `web-ext` to bundle a distribution package for the extension for Firefox. You do not need to install `web-ext`. Note that `web-ext` will generate a zip file which can also be used for the Chrome Web Store.
 
-Then generate a build (might need to make the file executable using `chmod +x build.sh`):
+Then pacakge a build (might need to make the file executable using `chmod +x package.sh`):
 ```
-npm run generate
+npm run package
 ```
 
 The script does:
