@@ -1,3 +1,5 @@
+import { browserAPI } from "./browser";
+
 export class LinkdingApi {
   constructor(configuration) {
     this.configuration = configuration;
@@ -6,14 +8,11 @@ export class LinkdingApi {
   async getBookmark(bookmarkId) {
     const configuration = this.configuration;
 
-    return fetch(
-      `${configuration.baseUrl}/api/bookmarks/${bookmarkId}/`,
-      {
-        headers: {
-          Authorization: `Token ${configuration.token}`,
-        },
-      }
-    ).then((response) => {
+    return fetch(`${configuration.baseUrl}/api/bookmarks/${bookmarkId}/`, {
+      headers: {
+        Authorization: `Token ${configuration.token}`,
+      },
+    }).then((response) => {
       if (response.status === 200) {
         return response.json();
       }
@@ -89,14 +88,11 @@ export class LinkdingApi {
     const configuration = this.configuration;
     url = encodeURIComponent(url);
 
-    return fetch(
-      `${configuration.baseUrl}/api/bookmarks/check/?url=${url}`,
-      {
-        headers: {
-          Authorization: `Token ${configuration.token}`,
-        },
-      }
-    ).then((response) => {
+    return fetch(`${configuration.baseUrl}/api/bookmarks/check/?url=${url}`, {
+      headers: {
+        Authorization: `Token ${configuration.token}`,
+      },
+    }).then((response) => {
       if (response.status === 200) {
         return response.json();
       }
@@ -108,16 +104,30 @@ export class LinkdingApi {
 
   async testConnection() {
     const configuration = this.configuration;
-    return fetch(`${configuration.baseUrl}/api/bookmarks/?limit=1`, {
-      headers: {
-        Authorization: `Token ${configuration.token}`,
-      },
-    })
-      .then((response) =>
-        response.status === 200 ? response.json() : Promise.reject(response)
-      )
-      .then((body) => !!body.results)
-      .catch(() => false);
+
+    // Request permission to access the page that runs Linkding
+    const granted = await browserAPI.permissions.request({
+      origins: [`${configuration.baseUrl}/*`],
+    });
+
+    if (granted) {
+      return fetch(`${configuration.baseUrl}/api/bookmarks/?limit=1`, {
+        headers: {
+          Authorization: `Token ${configuration.token}`,
+        },
+      })
+        .then((response) => {
+          return response.status === 200
+            ? response.json()
+            : Promise.reject(response);
+        })
+        .then((body) => {
+          return !!body.results;
+        })
+        .catch(() => false);
+    } else {
+      return false;
+    }
   }
 
   async findBookmarkByUrl(url) {

@@ -1,0 +1,17 @@
+{
+  "background": {
+    "scripts": [
+      "build/background.js"
+    ]
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{6bc19aa2-7d91-4791-b5d4-8d84b5f3cdad}",
+      "strict_min_version": "109.0"
+    }
+  },
+  "optional_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ]
+}

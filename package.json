@@ -1,6 +1,6 @@
 {
   "name": "linkding-extension",
-  "version": "1.7.0",
+  "version": "2.0.0",
   "description": "Companion extension for the linkding bookmark service",
   "license": "MIT",
   "author": "Sascha Ißbrücker",
@@ -12,21 +12,22 @@
     "url": "https://github.com/sissbruecker/linkding-extension/issues"
   },
   "homepage": "https://github.com/sissbruecker/linkding-extension#readme",
+  "type": "module",
   "scripts": {
+    "dev": "rollup -c -w",
     "build": "rollup -c",
-    "dev": "rollup -c -w"
+    "generate": "./build.sh"
   },
   "dependencies": {
-    "@rollup/plugin-commonjs": "^17.0.0",
-    "@rollup/plugin-node-resolve": "^11.0.1",
-    "rollup": "^2.35.1",
-    "rollup-plugin-svelte": "^7.0.0",
-    "rollup-plugin-terser": "^7.0.2",
+    "@rollup/plugin-node-resolve": "^15.1.0",
+    "rollup": "^3.26.3",
+    "rollup-plugin-svelte": "^7.1.6",
+    "@rollup/plugin-terser": "^0.4.3",
     "spectre.css": "^0.5.9",
-    "svelte": "^3.31.0"
+    "svelte": "^4.1.1"
   },
   "devDependencies": {
-    "prettier": "^2.2.1",
-    "web-ext": "^6.1.0"
+    "prettier": "^3.0.0",
+    "web-ext": "^7.6.2"
   }
 }

@@ -1,9 +1,8 @@
-import { getBrowser, getCurrentTabInfo } from "./browser";
+import { browserAPI, getCurrentTabInfo } from "./browser";
 import { loadTabMetadata } from "./cache";
 import { getConfiguration, isConfigurationComplete } from "./configuration";
 import { LinkdingApi } from "./linkding";
 
-const browser = getBrowser();
 let api = null;
 let configuration = null;
 let hasCompleteConfiguration = false;
@@ -27,16 +26,16 @@ async function initApi() {
 
 /* Omnibox / Search integration */
 
-browser.omnibox.onInputStarted.addListener(async () => {
+browserAPI.omnibox.onInputStarted.addListener(async () => {
   const isReady = await initApi();
   const description = isReady
     ? "Search bookmarks in linkding"
     : "⚠️ Please configure the linkding extension first";
 
-  browser.omnibox.setDefaultSuggestion({ description });
+  browserAPI.omnibox.setDefaultSuggestion({ description });
 });
 
-browser.omnibox.onInputChanged.addListener((text, suggest) => {
+browserAPI.omnibox.onInputChanged.addListener((text, suggest) => {
   if (!api) {
     return;
   }
@@ -55,7 +54,7 @@ browser.omnibox.onInputChanged.addListener((text, suggest) => {
     });
 });
 
-browser.omnibox.onInputEntered.addListener((content, disposition) => {
+browserAPI.omnibox.onInputEntered.addListener((content, disposition) => {
   if (!hasCompleteConfiguration || !content) {
     return;
   }
@@ -67,25 +66,25 @@ browser.omnibox.onInputEntered.addListener((content, disposition) => {
 
   switch (disposition) {
     case "currentTab":
-      browser.tabs.update({ url });
+      browserAPI.tabs.update({ url });
       break;
     case "newForegroundTab":
-      browser.tabs.create({ url });
+      browserAPI.tabs.create({ url });
       break;
     case "newBackgroundTab":
-      browser.tabs.create({ url, active: false });
+      browserAPI.tabs.create({ url, active: false });
       break;
   }
 });
 
 /* Precache bookmark / website metadata when tab or URL changes */
 
-browser.tabs.onActivated.addListener(async () => {
+browserAPI.tabs.onActivated.addListener(async () => {
   const tabInfo = await getCurrentTabInfo();
   await loadTabMetadata(tabInfo.url, true);
 });
 
-browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+browserAPI.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   // Only interested in URL changes
   // Ignore URL changes in non-active tabs
   if (!changeInfo.url || !tab.active) {
