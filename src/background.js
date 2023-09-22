@@ -55,7 +55,7 @@ browser.omnibox.onInputChanged.addListener((text, suggest) => {
     });
 });
 
-browser.omnibox.onInputEntered.addListener((content, disposition) => {
+browser.omnibox.onInputEntered.addListener(async (content, disposition) => {
   if (!hasCompleteConfiguration || !content) {
     return;
   }
@@ -64,6 +64,16 @@ browser.omnibox.onInputEntered.addListener((content, disposition) => {
   const url = isUrl
     ? content
     : `${configuration.baseUrl}/bookmarks?q=${encodeURIComponent(content)}`;
+
+  // Edge doesn't allow updating the New Tab Page (tested with version 117).
+  // Trying to do so will throw: "Error: Cannot update NTP tab."
+  // As a workaround, open a new tab instead.
+  if (disposition === "currentTab") {
+    const tabInfo = await getCurrentTabInfo();
+    if (tabInfo.url === "edge://newtab/") {
+      disposition = "newForegroundTab";
+    }
+  }
 
   switch (disposition) {
     case "currentTab":
