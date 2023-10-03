@@ -2,6 +2,7 @@
   import TagAutocomplete from './TagAutocomplete.svelte'
   import {getCurrentTabInfo, openOptions} from "./browser";
   import {loadTabMetadata, clearCachedTabMetadata} from "./cache";
+  import {getProfile, updateProfile} from "./profile";
 
   export let api;
   export let configuration;
@@ -14,11 +15,13 @@
   let notes = "";
   let tags = "";
   let unread = false;
+  let shared = false;
   let saveState = "";
   let errorMessage = "";
   let availableTagNames = []
   let bookmarkExists = false;
   let editNotes = false;
+  let profile = null;
 
   $: {
     if (api && configuration) {
@@ -27,16 +30,27 @@
   }
 
   async function init() {
-    const tabInfo = await getCurrentTabInfo();
-    url = tabInfo.url;
-    tags = configuration.default_tags;
-    const availableTags = await api.getTags().catch(() => [])
-    availableTagNames = availableTags.map(tag => tag.name)
+    // First get cached user profile to quickly show something, then update it
+    // in the background
+    profile = await getProfile();
+    updateProfile().then(updatedProfile => {
+      profile = updatedProfile;
+    });
 
-    loadExistingBookmarkData();
+    // Load available tags in the background
+    tags = configuration.default_tags;
+    api.getTags().catch(() => []).then(tags => {
+      availableTagNames = tags.map(tag => tag.name)
+    });
+
+    // Initialize bookmark form
+    await initForm();
   }
 
-  async function loadExistingBookmarkData() {
+  async function initForm() {
+    const tabInfo = await getCurrentTabInfo();
+    url = tabInfo.url;
+
     const tabMetadata = await loadTabMetadata(url);
     if (!tabMetadata) {
       return;
@@ -53,6 +67,7 @@
       description = existingBookmark.description;
       notes = existingBookmark.notes;
       unread = existingBookmark.unread;
+      shared = existingBookmark.shared;
     }
   }
 
@@ -65,6 +80,7 @@
       notes,
       tag_names: tagNames,
       unread,
+      shared,
     };
 
     try {
@@ -134,12 +150,19 @@
                 bind:value={notes}></textarea>
     {/if}
   </div>
-  <div class="form-group">
+  <div class="form-group d-flex">
     <label class="form-checkbox">
       <input type="checkbox" bind:checked={unread}>
       <i class="form-icon"></i>
       <span class="text-small">Mark as unread</span>
     </label>
+    {#if profile?.enable_sharing }
+      <label class="form-checkbox ml-2">
+        <input type="checkbox" bind:checked={shared}>
+        <i class="form-icon"></i>
+        <span class="text-small">Share</span>
+      </label>
+    {/if}
   </div>
   <div class="divider"></div>
   {#if saveState === 'success'}
