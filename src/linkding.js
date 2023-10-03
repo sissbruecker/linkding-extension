@@ -106,6 +106,23 @@ export class LinkdingApi {
     });
   }
 
+  async getUserProfile() {
+    const configuration = this.configuration;
+
+    return fetch(`${configuration.baseUrl}/api/user/profile/`, {
+      headers: {
+        Authorization: `Token ${configuration.token}`,
+      },
+    }).then((response) => {
+      if (response.status === 200) {
+        return response.json();
+      }
+      return Promise.reject(
+        `Error retrieving user profile: ${response.statusText}`
+      );
+    });
+  }
+
   async testConnection() {
     const configuration = this.configuration;
     return fetch(`${configuration.baseUrl}/api/bookmarks/?limit=1`, {
@@ -118,11 +135,5 @@ export class LinkdingApi {
       )
       .then((body) => !!body.results)
       .catch(() => false);
-  }
-
-  async findBookmarkByUrl(url) {
-    return this.search(url, { limit: 1 }).then((results) =>
-      results && results.length > 0 ? results[0] : undefined
-    );
   }
 }
