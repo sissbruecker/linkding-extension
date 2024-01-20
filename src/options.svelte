@@ -5,6 +5,8 @@
   let baseUrl = "";
   let token = "";
   let default_tags = "";
+  let shareSelected = false;
+  let unreadSelected = false;
   let precacheEnabled = false;
   let isSuccess = false;
   let isError = false;
@@ -15,6 +17,8 @@
     token = config.token;
     default_tags = config.default_tags;
     precacheEnabled = config.precacheEnabled;
+    shareSelected = config.shareSelected;
+    unreadSelected = config.unreadSelected;
   }
 
   init();
@@ -25,6 +29,8 @@
       token,
       default_tags,
       precacheEnabled,
+      shareSelected,
+      unreadSelected
     };
 
     const testResult = await new LinkdingApi(config).testConnection(config);
@@ -67,6 +73,23 @@
       Set of tags that should be added to new bookmarks by default.
     </div>
   </div>
+
+  <div class="form-group">
+    <label class="form-checkbox">
+      <input type="checkbox" bind:checked={unreadSelected}>
+      <i class="form-icon"></i>
+      <span>Unread is pre-selected when saving bookmark</span>
+    </label>
+  </div>
+
+  <div class="form-group">
+    <label class="form-checkbox">
+      <input type="checkbox" bind:checked={shareSelected}>
+      <i class="form-icon"></i>
+      <span>Share is pre-selected when saving bookmark</span>
+    </label>
+  </div>
+
   <div class="form-group">
     <label class="form-checkbox">
       <input type="checkbox" bind:checked={precacheEnabled}>
