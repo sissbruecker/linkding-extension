@@ -15,6 +15,14 @@
     "scripts": ["build/background.js"]
   },
 
+  "content_scripts": [
+    {
+      "matches": ["https://news.ycombinator.com/*"],
+      "js": ["build/contentscript.js"],
+      "run_at": "document_start"
+    }
+  ],
+
   "omnibox": {
     "keyword": "ld"
   },

@@ -104,3 +104,19 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 
   await loadTabMetadata(tab.url, true);
 });
+
+
+browser.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+  if (request.method == "getConfiguration") {
+    configuration = await getConfiguration();
+    return {data: configuration}
+  } else if (request.method == "currentTabUrl") {
+    return new Promise((resolve, reject) => {
+      browser.tabs.query({active:true, currentWindow: true}, (tabs) => {
+        var activeTab = tabs[0];
+        var activeTabUrl = activeTab.url;
+        resolve({url: activeTabUrl})
+      })
+    })
+  }
+})

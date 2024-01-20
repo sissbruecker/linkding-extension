@@ -63,5 +63,19 @@ export default [
 		watch: {
 			clearScreen: false
 		}
+	},
+	{
+		input: 'src/contentscript.js',
+		output: {
+			sourcemap: true,
+			format: 'iife',
+			file: 'build/contentscript.js',
+		},
+		plugins: [
+			production && terser()
+		],
+		watch: {
+			clearScreen: false
+		}
 	}
 ];
