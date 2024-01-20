@@ -88,6 +88,12 @@
       await api.saveBookmark(bookmark);
       await clearCachedTabMetadata();
       saveState = "success";
+
+      // close popup, once it's saved
+      window.setTimeout(() => {
+        window.close()
+      }, 350);
+
     } catch (e) {
       saveState = "error";
       errorMessage = e.toString();
