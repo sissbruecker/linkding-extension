@@ -29,21 +29,18 @@ async function initApi() {
 function setStarredBadge(tabId) {
   browser.browserAction.setBadgeText({ text: "★", tabId: tabId });
   browser.browserAction.setBadgeTextColor({ color: "#FFE234", tabId: tabId });
-  browser.browserAction.setBadgeBackgroundColor({ color: "rgba(102,6,0,0.3)", tabId: tabId });
-  browser.browserAction.setTitle({ title: "Edit bookmark", tabId: tabId });
+  browser.browserAction.setBadgeBackgroundColor({ color: "rgba(60,60,60,0.1)", tabId: tabId });
+  browser.browserAction.setTitle({ title: "Add bookmark (Alt+Shift+L)", tabId: tabId });
 }
 
 function resetStarredBadge(tabId) {
   browser.browserAction.setBadgeText({ text: "", tabId: tabId });
-  browser.browserAction.setTitle({ title: "Save bookmark", tabId: tabId });
+  browser.browserAction.setTitle({ title: "Add bookmark (Alt+Shift+L)", tabId: tabId });
 }
 
-async function setDymamicBadge(tabId) {
+async function setDynamicBadge(tabId, tabMetadata) {
   const badgeText = await browser.browserAction.getBadgeText({ tabId });
   const starred = badgeText === "★";
-
-  const tab = await browser.tabs.get(tabId);
-  const tabMetadata = await loadTabMetadata(tab.url);
 
   // Set badge if tab is bookmarked
   if (tabMetadata?.bookmark && !starred) setStarredBadge(tabId);
@@ -51,22 +48,6 @@ async function setDymamicBadge(tabId) {
   // Reset badge if tab is not bookmarked
   if (!tabMetadata?.bookmark && starred) resetStarredBadge(tabId);
 }
-
-// Set the badge when the tab is created
-browser.tabs.onCreated.addListener(({ tabId }) => {
-  setDymamicBadge(tabId);
-});
-
-// Set the badge when the tab is updated
-browser.tabs.onUpdated.addListener((tabId) => {
-  setDymamicBadge(tabId);
-});
-
-// Set the badge when the active tab changes
-browser.tabs.onActivated.addListener(({ tabId }) => {
-  setDymamicBadge(tabId);
-});
-
 
 /* Omnibox / Search integration */
 
@@ -133,9 +114,15 @@ browser.omnibox.onInputEntered.addListener(async (content, disposition) => {
 
 /* Precache bookmark / website metadata when tab or URL changes */
 
-browser.tabs.onActivated.addListener(async () => {
+// Set the badge when the tab is created
+browser.tabs.onCreated.addListener(async (tabId) => {
+  setDynamicBadge(tabId);
+});
+
+browser.tabs.onActivated.addListener(async (tabId) => {
   const tabInfo = await getCurrentTabInfo();
-  await loadTabMetadata(tabInfo.url, true);
+  let tabMetadata = await loadTabMetadata(tabInfo.url, true);
+  setDynamicBadge(tabId, tabMetadata);
 });
 
 browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
@@ -145,5 +132,6 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     return;
   }
 
-  await loadTabMetadata(tab.url, true);
+  let tabMetadata = await loadTabMetadata(tab.url, true);
+  setDynamicBadge(tabId, tabMetadata);
 });

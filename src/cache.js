@@ -5,6 +5,9 @@ import { LinkdingApi } from "./linkding";
 const TAB_METADATA_CACHE_KEY = "ld_tab_metadata_cache";
 
 export async function loadTabMetadata(url, precacheRequest = false) {
+  // the function should be called with precacheRequest = true
+  // anytime before the user has conciously decided to bookmark it.
+  // see https://github.com/sissbruecker/linkding-extension/issues/36
   const configuration = await getConfiguration();
   const hasCompleteConfiguration = isConfigurationComplete(configuration);
 
