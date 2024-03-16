@@ -1,4 +1,4 @@
-import { getBrowser, getCurrentTabInfo } from "./browser";
+import { getBrowser, getCurrentTabInfo, showBadge, removeBadge } from "./browser";
 import { loadTabMetadata } from "./cache";
 import { getConfiguration, isConfigurationComplete } from "./configuration";
 import { LinkdingApi } from "./linkding";
@@ -26,27 +26,13 @@ async function initApi() {
 }
 
 /* Dynamic badge */
-function setStarredBadge(tabId) {
-  browser.browserAction.setBadgeText({ text: "★", tabId: tabId });
-  browser.browserAction.setBadgeTextColor({ color: "#FFE234", tabId: tabId });
-  browser.browserAction.setBadgeBackgroundColor({ color: "rgba(60,60,60,0.1)", tabId: tabId });
-  browser.browserAction.setTitle({ title: "Add bookmark (Alt+Shift+L)", tabId: tabId });
-}
-
-function resetStarredBadge(tabId) {
-  browser.browserAction.setBadgeText({ text: "", tabId: tabId });
-  browser.browserAction.setTitle({ title: "Add bookmark (Alt+Shift+L)", tabId: tabId });
-}
-
 async function setDynamicBadge(tabId, tabMetadata) {
-  const badgeText = await browser.browserAction.getBadgeText({ tabId });
-  const starred = badgeText === "★";
-
   // Set badge if tab is bookmarked
-  if (tabMetadata?.bookmark && !starred) setStarredBadge(tabId);
-
-  // Reset badge if tab is not bookmarked
-  if (!tabMetadata?.bookmark && starred) resetStarredBadge(tabId);
+  if (tabMetadata?.bookmark) {
+    showBadge(tabId);
+  } else {
+    removeBadge(tabId);
+  }
 }
 
 /* Omnibox / Search integration */
@@ -114,15 +100,10 @@ browser.omnibox.onInputEntered.addListener(async (content, disposition) => {
 
 /* Precache bookmark / website metadata when tab or URL changes */
 
-// Set the badge when the tab is created
-browser.tabs.onCreated.addListener(async (tabId) => {
-  setDynamicBadge(tabId);
-});
-
-browser.tabs.onActivated.addListener(async (tabId) => {
+browser.tabs.onActivated.addListener(async (activeInfo) => {
   const tabInfo = await getCurrentTabInfo();
   let tabMetadata = await loadTabMetadata(tabInfo.url, true);
-  setDynamicBadge(tabId, tabMetadata);
+  setDynamicBadge(activeInfo.tabId, tabMetadata);
 });
 
 browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {

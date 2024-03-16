@@ -1,8 +1,9 @@
 <script>
   import TagAutocomplete from './TagAutocomplete.svelte'
-  import {getCurrentTabInfo, openOptions} from "./browser";
+  import {getCurrentTabInfo, openOptions, showBadge} from "./browser";
   import {loadTabMetadata, clearCachedTabMetadata} from "./cache";
   import {getProfile, updateProfile} from "./profile";
+  import {getConfiguration} from "./configuration";
 
   export let api;
   export let configuration;
@@ -22,6 +23,8 @@
   let bookmarkExists = false;
   let editNotes = false;
   let profile = null;
+  let tabInfo = null;
+  let extensionConfiguration = null;
 
   $: {
     if (api && configuration) {
@@ -45,10 +48,11 @@
 
     // Initialize bookmark form
     await initForm();
+    extensionConfiguration = await getConfiguration();
   }
 
   async function initForm() {
-    const tabInfo = await getCurrentTabInfo();
+    tabInfo = await getCurrentTabInfo();
     url = tabInfo.url;
 
     const tabMetadata = await loadTabMetadata(url);
@@ -88,6 +92,12 @@
       await api.saveBookmark(bookmark);
       await clearCachedTabMetadata();
       saveState = "success";
+      // Show star badge on the tab to indicate that it's now bookmarked
+      // but only if precaching is enabled, since the badge will never
+      // show when browsing without precaching
+      if (extensionConfiguration?.precacheEnabled) {
+        showBadge(tabInfo.id);
+      }
     } catch (e) {
       saveState = "error";
       errorMessage = e.toString();
