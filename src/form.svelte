@@ -62,6 +62,8 @@
 
     titlePlaceholder = tabMetadata.metadata.title;
     descriptionPlaceholder = tabMetadata.metadata.description;
+    shared = configuration.shareSelected;
+    unread = configuration.unreadSelected;
 
     const existingBookmark = tabMetadata.bookmark;
     if (existingBookmark) {
