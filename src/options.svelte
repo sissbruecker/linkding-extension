@@ -78,6 +78,11 @@
       bookmark popup. Otherwise the page title and description will be fetched after opening popup, which can take a
       moment for them to show up.
       <br>
+      <br>
+      Enabling this will also enable the extension to show a starred linkding logo if the website
+      in question is already bookmarked.
+      <br>
+      <br>
       <strong>Note:</strong> This will send the URL of all websites that you visit to your Linkding server, which will
       also be stored in the server logs.
     </div>

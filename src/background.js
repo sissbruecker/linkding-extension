@@ -1,4 +1,4 @@
-import { getBrowser, getCurrentTabInfo } from "./browser";
+import { getBrowser, getCurrentTabInfo, showBadge, removeBadge } from "./browser";
 import { loadTabMetadata } from "./cache";
 import { getConfiguration, isConfigurationComplete } from "./configuration";
 import { LinkdingApi } from "./linkding";
@@ -23,6 +23,16 @@ async function initApi() {
   }
 
   return api !== null;
+}
+
+/* Dynamic badge */
+async function setDynamicBadge(tabId, tabMetadata) {
+  // Set badge if tab is bookmarked
+  if (tabMetadata?.bookmark) {
+    showBadge(tabId);
+  } else {
+    removeBadge(tabId);
+  }
 }
 
 /* Omnibox / Search integration */
@@ -90,9 +100,10 @@ browser.omnibox.onInputEntered.addListener(async (content, disposition) => {
 
 /* Precache bookmark / website metadata when tab or URL changes */
 
-browser.tabs.onActivated.addListener(async () => {
+browser.tabs.onActivated.addListener(async (activeInfo) => {
   const tabInfo = await getCurrentTabInfo();
-  await loadTabMetadata(tabInfo.url, true);
+  let tabMetadata = await loadTabMetadata(tabInfo.url, true);
+  setDynamicBadge(activeInfo.tabId, tabMetadata);
 });
 
 browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
@@ -102,5 +113,6 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     return;
   }
 
-  await loadTabMetadata(tab.url, true);
+  let tabMetadata = await loadTabMetadata(tab.url, true);
+  setDynamicBadge(tabId, tabMetadata);
 });

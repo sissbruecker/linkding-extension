@@ -7,6 +7,7 @@ export async function getCurrentTabInfo() {
   const tab = tabs && tabs[0];
 
   return {
+    id: tab ? tab.id : "",
     url: tab ? tab.url : "",
     title: tab ? tab.title : ""
   };
@@ -37,4 +38,18 @@ export function setStorageItem(key, value) {
 export function openOptions() {
   getBrowser().runtime.openOptionsPage();
   window.close();
+}
+
+export function showBadge(tabId) {
+  const browser = getBrowser();
+  const action = browser.browserAction || browser.action;
+  action.setBadgeText({ text: "★", tabId: tabId });
+  action.setBadgeTextColor({ color: "#FFE234", tabId: tabId });
+  action.setBadgeBackgroundColor({ color: "rgba(100,100,100,1)", tabId: tabId });
+}
+
+export function removeBadge(tabId) {
+  const browser = getBrowser();
+  const action = browser.browserAction || browser.action;
+  action.setBadgeText({ text: "", tabId: tabId });
 }
