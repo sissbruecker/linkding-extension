@@ -78,16 +78,22 @@
     <label class="form-checkbox">
       <input type="checkbox" bind:checked={unreadSelected}>
       <i class="form-icon"></i>
-      <span>Unread is pre-selected when saving bookmark</span>
+      <span>Pre-select unread when adding bookmark</span>
     </label>
+    <div class="form-input-hint">
+      Marks new bookmarks as unread by default.
+    </div>
   </div>
 
   <div class="form-group">
     <label class="form-checkbox">
       <input type="checkbox" bind:checked={shareSelected}>
       <i class="form-icon"></i>
-      <span>Share is pre-selected when saving bookmark</span>
+      <span>Pre-select share when saving bookmark</span>
     </label>
+    <div class="form-input-hint">
+      Marks new bookmarks as shared by default. Only useful if you have enabled bookmark sharing in linkding.
+    </div>
   </div>
 
   <div class="form-group">
