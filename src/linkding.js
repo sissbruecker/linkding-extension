@@ -51,7 +51,7 @@ export class LinkdingApi {
   async getTags() {
     const configuration = this.configuration;
 
-    return fetch(`${configuration.baseUrl}/api/tags/?limit=1000`, {
+    return fetch(`${configuration.baseUrl}/api/tags/?limit=5000`, {
       headers: {
         Authorization: `Token ${configuration.token}`,
       },
