@@ -27,7 +27,7 @@
 
         const word = getCurrentWord(input);
 
-        suggestions = word ? tags.filter(tag => tag.indexOf(word) === 0) : [];
+        suggestions = word ? tags.filter(tag => tag.toLowerCase().indexOf(word.toLowerCase()) === 0) : [];
 
         if (word && suggestions.length > 0) {
             open();
