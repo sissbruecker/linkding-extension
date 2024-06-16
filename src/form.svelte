@@ -15,6 +15,7 @@
   let description = "";
   let notes = "";
   let tags = "";
+  let autoTags = "";
   let unread = false;
   let shared = false;
   let saveState = "";
@@ -74,6 +75,14 @@
       notes = existingBookmark.notes;
       unread = existingBookmark.unread;
       shared = existingBookmark.shared;
+      autoTags = "";
+    } else {
+      // Only show auto tags for new bookmarks
+      // Auto tags are only supported since v1.31.0, so we need to check if they are available
+      const autoTagsList = tabMetadata.auto_tags;
+      if (autoTagsList) {
+        autoTags = autoTagsList.join(" ");
+      }
     }
   }
 
@@ -136,6 +145,11 @@
   <div class="form-group">
     <label class="form-label label-sm" for="input-tags">Tags</label>
     <TagAutocomplete id="input-tags" name="tags" bind:value={tags} tags={availableTagNames}/>
+    {#if autoTags}
+      <div class="form-input-hint text-success">
+        Auto tags: {autoTags}
+      </div>
+    {/if}
   </div>
   <div class="form-group">
     <label class="form-label label-sm" for="input-title">Title</label>
