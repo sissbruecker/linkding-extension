@@ -87,6 +87,7 @@
     }
 </script>
 
+<!-- svelte-ignore a11y-autofocus -->
 <div class="form-autocomplete">
     <!-- autocomplete input container -->
     <div class="form-autocomplete-input form-input" class:is-focused={isFocus}>
@@ -103,6 +104,7 @@
         <!-- menu list items -->
         {#each suggestions as tag,i}
             <li class="menu-item" class:selected={selectedIndex === i}>
+                <!-- svelte-ignore a11y-invalid-attribute -->
                 <a href="#" on:mousedown|preventDefault={() => complete(tag)}>
                     <div class="tile tile-centered">
                         <div class="tile-content">

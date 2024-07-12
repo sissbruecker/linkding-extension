@@ -127,6 +127,7 @@
 </script>
 <div class="title-row">
   <h6>{bookmarkExists ? "Edit Bookmark" : "Add bookmark"}</h6>
+  <!-- svelte-ignore a11y-invalid-attribute -->
   <a href="#" on:click|preventDefault={handleOptions}>Options</a>
 </div>
 <div class="divider"></div>
