@@ -92,7 +92,7 @@
     <div class="form-autocomplete-input form-input" class:is-focused={isFocus}>
         <!-- autocomplete real input box -->
         <input id="{id}" name="{name}" autofocus
-               class="form-input input-sm" type="text" autocomplete="off"
+               class="form-input" type="text" autocomplete="off"
                bind:value={value}
                on:input={handleInput} on:keydown={handleKeyDown}
                on:focus={handleFocus} on:blur={handleBlur}>
@@ -120,16 +120,23 @@
         display: none;
         max-height: 200px;
         overflow: auto;
-        font-size: .7rem;
     }
 
     .menu.open {
         display: block;
     }
 
-    /* TODO: Should be read from theme */
-    .menu-item.selected > a {
-        background: #f1f1fc;
-        color: #5755d9;
+    .form-autocomplete-input {
+        box-sizing: border-box;
+        height: var(--control-size);
+        min-height: var(--control-size);
+        padding: 0;
+    }
+
+    .form-autocomplete-input input {
+        width: 100%;
+        height: 100%;
+        border: none;
+        margin: 0;
     }
 </style>

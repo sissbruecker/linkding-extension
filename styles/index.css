@@ -2,3 +2,13 @@ body {
     padding: 16px;
     min-width: 400px;
 }
+
+/* Override responsive styles that change font-size on inputs */
+.form-input {
+    font-size: var(--font-size) !important;
+}
+
+/* Remove scrollbar gutter as it should never be shown in either popup or options */
+html {
+    scrollbar-gutter: initial;
+}

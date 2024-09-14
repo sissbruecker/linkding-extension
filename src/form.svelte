@@ -129,21 +129,20 @@
   <h6>{bookmarkExists ? "Edit Bookmark" : "Add bookmark"}</h6>
   <a href="#" on:click|preventDefault={handleOptions}>Options</a>
 </div>
-<div class="divider"></div>
 <form class="form" on:submit|preventDefault={handleSubmit}>
   <div class="form-group">
-    <label class="form-label label-sm" for="input-url">URL</label>
-    <input class="form-input input-sm" type="text" id="input-url" placeholder="URL"
+    <label class="form-label" for="input-url">URL</label>
+    <input class="form-input" type="text" id="input-url" placeholder="URL"
            bind:value={url}>
     {#if bookmarkExists}
-      <div class="form-input-hint bookmark-exists">
+      <div class="form-input-hint text-warning">
         This URL is already bookmarked. The form has been prefilled from the existing bookmark, and saving the form will
         update the existing bookmark.
       </div>
     {/if}
   </div>
   <div class="form-group">
-    <label class="form-label label-sm" for="input-tags">Tags</label>
+    <label class="form-label" for="input-tags">Tags</label>
     <TagAutocomplete id="input-tags" name="tags" bind:value={tags} tags={availableTagNames}/>
     {#if autoTags}
       <div class="form-input-hint text-success">
@@ -152,27 +151,27 @@
     {/if}
   </div>
   <div class="form-group">
-    <label class="form-label label-sm" for="input-title">Title</label>
-    <input class="form-input input-sm" type="text" id="input-title"
+    <label class="form-label" for="input-title">Title</label>
+    <input class="form-input" type="text" id="input-title"
            bind:value={title} placeholder={titlePlaceholder}>
   </div>
   <div class="form-group">
     {#if !editNotes}
       <div class="form-label-row">
-        <label class="form-label label-sm" for="input-description">Description</label>
-        <button type="button" class="btn btn-link btn-sm" on:click|preventDefault={toggleNotes}>Edit notes</button>
+        <label class="form-label" for="input-description">Description</label>
+        <button type="button" class="btn btn-link" on:click|preventDefault={toggleNotes}>Edit notes</button>
       </div>
-      <textarea class="form-input input-sm" id="input-description"
+      <textarea class="form-input" id="input-description"
                 bind:value={description}
                 placeholder={descriptionPlaceholder}></textarea>
     {/if}
     {#if editNotes}
       <div class="form-label-row">
-        <label class="form-label label-sm" for="input-notes">Notes</label>
-        <button type="button" class="btn btn-link btn-sm" on:click|preventDefault={toggleNotes}>Edit description
+        <label class="form-label" for="input-notes">Notes</label>
+        <button type="button" class="btn btn-link" on:click|preventDefault={toggleNotes}>Edit description
         </button>
       </div>
-      <textarea class="form-input input-sm" id="input-notes" rows="5"
+      <textarea class="form-input" id="input-notes" rows="5"
                 bind:value={notes}></textarea>
     {/if}
   </div>
@@ -180,48 +179,71 @@
     <label class="form-checkbox">
       <input type="checkbox" bind:checked={unread}>
       <i class="form-icon"></i>
-      <span class="text-small">Mark as unread</span>
+      <span>Mark as unread</span>
     </label>
     {#if profile?.enable_sharing }
-      <label class="form-checkbox ml-2">
+      <label class="form-checkbox ml-4">
         <input type="checkbox" bind:checked={shared}>
         <i class="form-icon"></i>
-        <span class="text-small">Share</span>
+        <span>Share</span>
       </label>
     {/if}
   </div>
-  <div class="divider"></div>
-  {#if saveState === 'success'}
-    <div class="form-group has-success result-row">
-      <div class="form-input-hint"><i class="icon icon-check"></i> Bookmark saved</div>
-    </div>
-  {/if}
-  {#if saveState === 'error'}
-    <div class="form-group has-error result-row">
-      <div class="form-input-hint">Error saving bookmark: {errorMessage}</div>
-    </div>
-  {/if}
-  {#if saveState !== 'success'}
-    <div class="button-row">
-      <button type="submit" class="btn btn-primary" class:loading={saveState === 'loading'}>Save</button>
-    </div>
-  {/if}
+  <div class="footer">
+    {#if saveState === 'success'}
+      <div class="result-row text-success">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+          <path d="M5 12l5 5l10 -10"/>
+        </svg>
+        <span>Bookmark saved</span>
+      </div>
+    {/if}
+    {#if saveState === 'error'}
+      <div class="result-row text-error">
+        Error saving bookmark: {errorMessage}
+      </div>
+    {/if}
+    {#if saveState !== 'success'}
+      <div class="button-row">
+        <button type="submit" class="btn btn-primary" class:loading={saveState === 'loading'}>Save</button>
+      </div>
+    {/if}
+  </div>
 </form>
 
 <style>
     form {
+        width: 100%;
         max-width: 400px;
+    }
+
+    .form-group {
+        margin-bottom: var(--unit-3) !important;
+    }
+
+    .form-group .form-label {
+        margin-bottom: var(--unit-1) !important;
     }
 
     .title-row {
         display: flex;
         justify-content: space-between;
         align-items: baseline;
+        padding-bottom: var(--unit-2);
+        border-bottom: solid 1px var(--secondary-border-color);
     }
 
     .form-label-row {
         display: flex;
         justify-content: space-between;
+        align-items: baseline;
+    }
+
+    .footer {
+        padding-top: var(--unit-4);
+        border-top: solid 1px var(--secondary-border-color);
     }
 
     .button-row {
@@ -237,9 +259,7 @@
     .result-row {
         display: flex;
         justify-content: center;
-    }
-
-    .bookmark-exists {
-        color: #ffb700;
+        align-items: center;
+        gap: var(--unit-2);
     }
 </style>
