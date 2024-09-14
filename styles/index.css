@@ -1,5 +1,5 @@
 body {
-    padding: 16px;
+    padding: var(--unit-4);
     min-width: 400px;
 }
 

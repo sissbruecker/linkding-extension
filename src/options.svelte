@@ -46,7 +46,6 @@
   }
 </script>
 <h6>Configuration</h6>
-<div class="divider"></div>
 <p>This is a companion extension for the <a href="https://github.com/sissbruecker/linkding">linkding</a> bookmark
   service. Before you can start using it you have to configure some basic settings, so that the extension can
   communicate with your linkding installation.</p>
@@ -116,7 +115,6 @@
       also be stored in the server logs.
     </div>
   </div>
-  <div class="divider"></div>
   <div class="button-row">
     {#if isSuccess}
       <div class="status text-success mr-2">
@@ -140,7 +138,7 @@
         <span>Connection failed</span>
       </div>
     {/if}
-    <button type="submit" class="btn btn-primary ml-2" disabled={!(baseUrl && token)}>
+    <button type="submit" class="btn btn-primary btn-wide ml-2" disabled={!(baseUrl && token)}>
       Save
     </button>
   </div>
@@ -156,10 +154,5 @@
         display: flex;
         justify-content: flex-end;
         align-items: center;
-    }
-
-    .button-row button {
-        padding-left: 32px;
-        padding-right: 32px;
     }
 </style>

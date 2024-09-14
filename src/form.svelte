@@ -207,7 +207,7 @@
     {/if}
     {#if saveState !== 'success'}
       <div class="button-row">
-        <button type="submit" class="btn btn-primary" class:loading={saveState === 'loading'}>Save</button>
+        <button type="submit" class="btn btn-primary btn-wide" class:loading={saveState === 'loading'}>Save</button>
       </div>
     {/if}
   </div>
@@ -249,11 +249,6 @@
     .button-row {
         display: flex;
         justify-content: flex-end;
-    }
-
-    .button-row button {
-        padding-left: 32px;
-        padding-right: 32px;
     }
 
     .result-row {
