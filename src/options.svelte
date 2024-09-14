@@ -46,7 +46,6 @@
   }
 </script>
 <h6>Configuration</h6>
-<div class="divider"></div>
 <p>This is a companion extension for the <a href="https://github.com/sissbruecker/linkding">linkding</a> bookmark
   service. Before you can start using it you have to configure some basic settings, so that the extension can
   communicate with your linkding installation.</p>
@@ -116,32 +115,44 @@
       also be stored in the server logs.
     </div>
   </div>
-  <div class="divider"></div>
   <div class="button-row">
     {#if isSuccess}
-      <div class="form-group has-success mr-2">
-        <span class="form-input-hint"><i class="icon icon-check"></i> Connection successful</span>
+      <div class="status text-success mr-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+          <path d="M5 12l5 5l10 -10"/>
+        </svg>
+        <span>Connection successful</span>
       </div>
     {/if}
     {#if isError}
-      <div class="form-group has-error mr-2">
-        <span class="form-input-hint"><i class="icon icon-cross"></i> Connection failed</span>
+      <div class="status text-error mr-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+          <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/>
+          <path d="M12 9v4"/>
+          <path d="M12 16v.01"/>
+        </svg>
+        <span>Connection failed</span>
       </div>
     {/if}
-    <button type="submit" class="btn btn-primary ml-2" disabled={!(baseUrl && token)}>
+    <button type="submit" class="btn btn-primary btn-wide ml-2" disabled={!(baseUrl && token)}>
       Save
     </button>
   </div>
 </form>
 <style>
+    .status {
+        display: flex;
+        align-items: center;
+        gap: var(--unit-2);
+    }
+
     .button-row {
         display: flex;
         justify-content: flex-end;
-        align-items: baseline;
-    }
-
-    .button-row button {
-        padding-left: 32px;
-        padding-right: 32px;
+        align-items: center;
     }
 </style>
