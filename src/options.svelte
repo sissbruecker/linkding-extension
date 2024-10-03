@@ -5,8 +5,9 @@
   let baseUrl = "";
   let token = "";
   let default_tags = "";
-  let shareSelected = false;
   let unreadSelected = false;
+  let shareSelected = false;
+  let useBrowserMetadata = false;
   let precacheEnabled = false;
   let isSuccess = false;
   let isError = false;
@@ -16,9 +17,10 @@
     baseUrl = config.baseUrl;
     token = config.token;
     default_tags = config.default_tags;
-    precacheEnabled = config.precacheEnabled;
-    shareSelected = config.shareSelected;
     unreadSelected = config.unreadSelected;
+    shareSelected = config.shareSelected;
+    useBrowserMetadata = config.useBrowserMetadata;
+    precacheEnabled = config.precacheEnabled;
   }
 
   init();
@@ -28,9 +30,10 @@
       baseUrl,
       token,
       default_tags,
-      precacheEnabled,
+      unreadSelected,
       shareSelected,
-      unreadSelected
+      useBrowserMetadata,
+      precacheEnabled,
     };
 
     const testResult = await new LinkdingApi(config).testConnection(config);
@@ -92,6 +95,20 @@
     </label>
     <div class="form-input-hint">
       Marks new bookmarks as shared by default. Only useful if you have enabled bookmark sharing in linkding.
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="form-checkbox">
+      <input type="checkbox" bind:checked={useBrowserMetadata}>
+      <i class="form-icon"></i>
+      <span>Use browser metadata</span>
+    </label>
+    <div class="form-input-hint">
+      By default, the extension will fetch the page title and description from the linkding server when adding a new
+      bookmark. Enabling this will use the metadata from the current browser tab instead. This gives better results
+      for websites that use bot detection or require login, but can give worse results for websites that don't properly
+      update the page title or description while browsing.
     </div>
   </div>
 

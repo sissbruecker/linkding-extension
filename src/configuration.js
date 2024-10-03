@@ -5,6 +5,7 @@ const DEFAULTS = {
   baseUrl: "",
   token: "",
   default_tags: "",
+  useBrowserMetadata: false,
   precacheEnabled: false,
 };
 

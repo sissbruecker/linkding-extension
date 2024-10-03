@@ -1,5 +1,5 @@
 import { getBrowser, getCurrentTabInfo, showBadge, removeBadge } from "./browser";
-import { loadTabMetadata } from "./cache";
+import { loadServerMetadata } from "./cache";
 import { getConfiguration, isConfigurationComplete } from "./configuration";
 import { LinkdingApi } from "./linkding";
 
@@ -102,7 +102,7 @@ browser.omnibox.onInputEntered.addListener(async (content, disposition) => {
 
 browser.tabs.onActivated.addListener(async (activeInfo) => {
   const tabInfo = await getCurrentTabInfo();
-  let tabMetadata = await loadTabMetadata(tabInfo.url, true);
+  let tabMetadata = await loadServerMetadata(tabInfo.url, true);
   setDynamicBadge(activeInfo.tabId, tabMetadata);
 });
 
@@ -113,6 +113,6 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     return;
   }
 
-  let tabMetadata = await loadTabMetadata(tab.url, true);
+  let tabMetadata = await loadServerMetadata(tab.url, true);
   setDynamicBadge(tabId, tabMetadata);
 });
