@@ -1,7 +1,7 @@
 <script>
   import TagAutocomplete from './TagAutocomplete.svelte'
-  import {getCurrentTabInfo, openOptions, showBadge} from "./browser";
-  import {loadTabMetadata, clearCachedTabMetadata} from "./cache";
+  import {getBrowserMetadata, getCurrentTabInfo, openOptions, showBadge} from "./browser";
+  import {loadServerMetadata, clearCachedServerMetadata} from "./cache";
   import {getProfile, updateProfile} from "./profile";
   import {getConfiguration} from "./configuration";
 
@@ -26,6 +26,7 @@
   let profile = null;
   let tabInfo = null;
   let extensionConfiguration = null;
+  let loading = false;
 
   $: {
     if (api && configuration) {
@@ -56,17 +57,30 @@
     tabInfo = await getCurrentTabInfo();
     url = tabInfo.url;
 
-    const tabMetadata = await loadTabMetadata(url);
-    if (!tabMetadata) {
-      return;
+    loading = true;
+    const [serverMetadata, browserMetadata] = await Promise.all([
+      loadServerMetadata(url),
+      getBrowserMetadata(url),
+    ]);
+    loading = false;
+
+    if (configuration.useBrowserMetadata) {
+      title = browserMetadata.title;
+      description = browserMetadata.description;
+    } else {
+      title = serverMetadata.metadata.title;
+      description = serverMetadata.metadata.description;
     }
 
-    titlePlaceholder = tabMetadata.metadata.title;
-    descriptionPlaceholder = tabMetadata.metadata.description;
     shared = configuration.shareSelected;
     unread = configuration.unreadSelected;
 
-    const existingBookmark = tabMetadata.bookmark;
+    // If the bookmark already exists, prefill the form with the existing bookmark
+    if (!serverMetadata) {
+      return;
+    }
+
+    const existingBookmark = serverMetadata.bookmark;
     if (existingBookmark) {
       bookmarkExists = true;
       title = existingBookmark.title;
@@ -79,7 +93,7 @@
     } else {
       // Only show auto tags for new bookmarks
       // Auto tags are only supported since v1.31.0, so we need to check if they are available
-      const autoTagsList = tabMetadata.auto_tags;
+      const autoTagsList = serverMetadata.auto_tags;
       if (autoTagsList) {
         autoTags = autoTagsList.join(" ");
       }
@@ -101,7 +115,7 @@
     try {
       saveState = "loading";
       await api.saveBookmark(bookmark);
-      await clearCachedTabMetadata();
+      await clearCachedServerMetadata();
       saveState = "success";
       // Show star badge on the tab to indicate that it's now bookmarked
       // but only if precaching is enabled, since the badge will never
@@ -132,8 +146,13 @@
 <form class="form" on:submit|preventDefault={handleSubmit}>
   <div class="form-group">
     <label class="form-label" for="input-url">URL</label>
-    <input class="form-input" type="text" id="input-url" placeholder="URL"
-           bind:value={url}>
+    <div class="has-icon-right">
+      <input class="form-input" type="text" id="input-url" placeholder="URL"
+             bind:value={url}>
+      {#if loading}
+        <i class="form-icon loading"></i>
+      {/if}
+    </div>
     {#if bookmarkExists}
       <div class="form-input-hint text-warning">
         This URL is already bookmarked. The form has been prefilled from the existing bookmark, and saving the form will

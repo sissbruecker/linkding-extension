@@ -2,11 +2,11 @@ import { getStorageItem, setStorageItem } from "./browser";
 import { getConfiguration, isConfigurationComplete } from "./configuration";
 import { LinkdingApi } from "./linkding";
 
-const TAB_METADATA_CACHE_KEY = "ld_tab_metadata_cache";
+const SERVER_METADATA_CACHE_KEY = "ld_server_metadata_cache";
 
-export async function loadTabMetadata(url, precacheRequest = false) {
+export async function loadServerMetadata(url, precacheRequest = false) {
   // the function should be called with precacheRequest = true
-  // anytime before the user has conciously decided to bookmark it.
+  // anytime before the user has consciously decided to bookmark it.
   // see https://github.com/sissbruecker/linkding-extension/issues/36
   const configuration = await getConfiguration();
   const hasCompleteConfiguration = isConfigurationComplete(configuration);
@@ -17,7 +17,7 @@ export async function loadTabMetadata(url, precacheRequest = false) {
   }
 
   // Check for cached metadata first
-  const cachedMetadata = await getCachedTabMetadata();
+  const cachedMetadata = await getCachedServerMetadata();
   if (cachedMetadata && cachedMetadata.metadata.url === url) {
     return cachedMetadata;
   }
@@ -32,7 +32,7 @@ export async function loadTabMetadata(url, precacheRequest = false) {
       if (tabMetadata.bookmark && !tabMetadata.bookmark.date_added) {
         tabMetadata.bookmark = await api.getBookmark(tabMetadata.bookmark.id);
       }
-      await cacheTabMetadata(tabMetadata);
+      await cacheServerMetadata(tabMetadata);
       return tabMetadata;
     } catch (e) {
       console.error(e);
@@ -44,16 +44,16 @@ export async function loadTabMetadata(url, precacheRequest = false) {
   }
 }
 
-export async function getCachedTabMetadata() {
-  const json = await getStorageItem(TAB_METADATA_CACHE_KEY);
+export async function getCachedServerMetadata() {
+  const json = await getStorageItem(SERVER_METADATA_CACHE_KEY);
   return json ? JSON.parse(json) : null;
 }
 
-export async function cacheTabMetadata(tabMetadata) {
+export async function cacheServerMetadata(tabMetadata) {
   const json = JSON.stringify(tabMetadata);
-  await setStorageItem(TAB_METADATA_CACHE_KEY, json);
+  await setStorageItem(SERVER_METADATA_CACHE_KEY, json);
 }
 
-export async function clearCachedTabMetadata() {
-  await cacheTabMetadata(null);
+export async function clearCachedServerMetadata() {
+  await cacheServerMetadata(null);
 }

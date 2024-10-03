@@ -26,7 +26,7 @@ export class LinkdingApi {
   async saveBookmark(bookmark) {
     const configuration = this.configuration;
 
-    return fetch(`${configuration.baseUrl}/api/bookmarks/`, {
+    return fetch(`${configuration.baseUrl}/api/bookmarks/?disable_scraping`, {
       method: "POST",
       headers: {
         Authorization: `Token ${configuration.token}`,
