@@ -102,6 +102,7 @@
 
   async function handleSubmit() {
     const tagNames = tags.split(" ").map(tag => tag.trim()).filter(tag => !!tag);
+    description =  description ? description : ""
     const bookmark = {
       url,
       title,
