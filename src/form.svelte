@@ -104,8 +104,8 @@
     const tagNames = tags.split(" ").map(tag => tag.trim()).filter(tag => !!tag);
     const bookmark = {
       url,
-      title,
-      description,
+      title: title || "",
+      description: description || "",
       notes,
       tag_names: tagNames,
       unread,
