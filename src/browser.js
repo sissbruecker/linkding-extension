@@ -86,26 +86,43 @@ export async function getBrowserMetadata() {
   }
 }
 
-function useChromeStorage() {
-  return typeof chrome !== "undefined" && !!chrome.storage;
+export function getStorage() {
+  if (
+    typeof browser !== "undefined" &&
+    typeof browser.storage !== "undefined"
+  ) {
+    return browser.storage.local;
+  } else if (
+    typeof chrome !== "undefined" &&
+    typeof chrome.storage !== "undefined"
+  ) {
+    return chrome.storage.local;
+  } else {
+    throw new Error("Storage API not found.");
+  }
 }
 
-export function getStorageItem(key) {
-  if (useChromeStorage()) {
-    const result = chrome.storage.local.get([key]);
-    return result.then((data) => data[key]);
-  } else {
-    return Promise.resolve(localStorage.getItem(key));
+export async function getStorageItem(key) {
+  const storage = getStorage();
+  const results = await storage.get([key]);
+  let data = results[key];
+
+  if (!data) {
+    // Try lookup in local storage as fallback, which was used for storing
+    // settings in Firefox before switching to storage API
+    try {
+      data = localStorage.getItem(key);
+    } catch (e) {
+      // Ignore
+    }
   }
+
+  return data;
 }
 
 export function setStorageItem(key, value) {
-  if (useChromeStorage()) {
-    return chrome.storage.local.set({ [key]: value });
-  } else {
-    localStorage.setItem(key, value);
-    return Promise.resolve();
-  }
+  const storage = getStorage();
+  return storage.set({ [key]: value });
 }
 
 export function openOptions() {
