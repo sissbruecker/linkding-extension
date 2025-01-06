@@ -9,6 +9,8 @@
   let shareSelected = false;
   let useBrowserMetadata = false;
   let precacheEnabled = false;
+  let closeAddBookmarkWindowOnSave = false;
+  let closeAddBookmarkWindowOnSaveMs = 500;
   let isSuccess = false;
   let isError = false;
 
@@ -21,6 +23,8 @@
     shareSelected = config.shareSelected;
     useBrowserMetadata = config.useBrowserMetadata;
     precacheEnabled = config.precacheEnabled;
+    closeAddBookmarkWindowOnSave = config.closeAddBookmarkWindowOnSave;
+    closeAddBookmarkWindowOnSaveMs = config.closeAddBookmarkWindowOnSaveMs;
   }
 
   init();
@@ -34,6 +38,8 @@
       shareSelected,
       useBrowserMetadata,
       precacheEnabled,
+      closeAddBookmarkWindowOnSave,
+      closeAddBookmarkWindowOnSaveMs,
     };
 
     const testResult = await new LinkdingApi(config).testConnection(config);
@@ -132,6 +138,31 @@
       also be stored in the server logs.
     </div>
   </div>
+
+  <div class="form-group">
+    <label class="form-checkbox">
+      <input type="checkbox" bind:checked={closeAddBookmarkWindowOnSave}>
+      <i class="form-icon"></i>
+      <span>Automatically close the popup window after saving a bookmark</span>
+    </label>
+    <div class="form-input-hint">
+      The popup window will automatically close once you’ve saved a bookmark, otherwise by default it will remain open until you close it.
+    </div>
+  </div>
+
+  {#if closeAddBookmarkWindowOnSave}
+    <div class="form-group">
+      <label class="form-label" for="input-close-window-on-save-time">Popup window close time delay after saving a bookmark<span class="text-error">*</span></label>
+      <input class="form-input" type="number" id="input-close-window-on-save-time" placeholder="500" bind:value={closeAddBookmarkWindowOnSaveMs}>
+      <div class="form-input-hint">
+        The time in milliseconds to wait before closing the bookmark popup window after saving a bookmark.
+        <br>
+        <br>
+        <strong>Default:</strong> 500
+      </div>
+    </div>
+  {/if}
+
   <div class="button-row">
     {#if isSuccess}
       <div class="status text-success mr-2">
