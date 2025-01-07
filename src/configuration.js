@@ -7,6 +7,8 @@ const DEFAULTS = {
   default_tags: "",
   useBrowserMetadata: false,
   precacheEnabled: false,
+  closeAddBookmarkWindowOnSave: false,
+  closeAddBookmarkWindowOnSaveMs: 500,
 };
 
 export async function getConfiguration() {

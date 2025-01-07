@@ -123,6 +123,12 @@
       if (extensionConfiguration?.precacheEnabled) {
         showBadge(tabInfo.id);
       }
+
+      if (extensionConfiguration?.closeAddBookmarkWindowOnSave === true && extensionConfiguration?.closeAddBookmarkWindowOnSaveMs >= 0) {
+        window.setTimeout(() => {
+          window.close()
+        }, extensionConfiguration?.closeAddBookmarkWindowOnSaveMs);
+      }
     } catch (e) {
       saveState = "error";
       errorMessage = e.toString();
