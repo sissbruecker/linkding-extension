@@ -156,9 +156,6 @@
       <input class="form-input" type="number" id="input-close-window-on-save-time" placeholder="500" bind:value={closeAddBookmarkWindowOnSaveMs}>
       <div class="form-input-hint">
         The time in milliseconds to wait before closing the bookmark popup window after saving a bookmark.
-        <br>
-        <br>
-        <strong>Default:</strong> 500
       </div>
     </div>
   {/if}
