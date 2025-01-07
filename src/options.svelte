@@ -153,7 +153,7 @@
   {#if closeAddBookmarkWindowOnSave}
     <div class="form-group">
       <label class="form-label" for="input-close-window-on-save-time">Popup window close time delay after saving a bookmark<span class="text-error">*</span></label>
-      <input class="form-input" type="number" id="input-close-window-on-save-time" placeholder="500" bind:value={closeAddBookmarkWindowOnSaveMs}>
+      <input class="form-input" type="number" id="input-close-window-on-save-time" bind:value={closeAddBookmarkWindowOnSaveMs}>
       <div class="form-input-hint">
         The time in milliseconds to wait before closing the bookmark popup window after saving a bookmark.
       </div>
