@@ -55,7 +55,8 @@
 
   async function initForm() {
     tabInfo = await getCurrentTabInfo();
-    url = tabInfo.url;
+    // The new URI API https://caniuse.com/url keep the final slash always
+    url = new URL(tabInfo.url).href;
 
     loading = true;
     const [serverMetadata, browserMetadata] = await Promise.all([
