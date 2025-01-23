@@ -23,6 +23,8 @@
   let availableTagNames = []
   let bookmarkExists = false;
   let editNotes = false;
+  let titleFilled = false;
+  let descriptionFilled = false;
   let profile = null;
   let tabInfo = null;
   let extensionConfiguration = null;
@@ -83,9 +85,21 @@
     const existingBookmark = serverMetadata.bookmark;
     if (existingBookmark) {
       bookmarkExists = true;
-      title = existingBookmark.title;
+      if (title != ""){
+        titleFilled = true;
+      }
+      // keep the title if the current bookmark is empty
+      if (existingBookmark.title != "") {
+        title = existingBookmark.title;
+      }
       tags = existingBookmark.tag_names ? existingBookmark.tag_names.join(" ") : "";
-      description = existingBookmark.description;
+      if (description != ""){
+        descriptionFilled = true;
+      }
+      // keep the description if the current bookmark is empty
+      if (existingBookmark.description != "") {
+        description = existingBookmark.description;
+      }
       notes = existingBookmark.notes;
       unread = existingBookmark.unread;
       shared = existingBookmark.shared;
@@ -179,6 +193,11 @@
     <label class="form-label" for="input-title">Title</label>
     <input class="form-input" type="text" id="input-title"
            bind:value={title} placeholder={titlePlaceholder}>
+    {#if titleFilled}
+      <div class="form-input-hint text-success">
+        Title empty, save the bookmark to keep this.
+      </div>
+    {/if}
   </div>
   <div class="form-group">
     {#if !editNotes}
@@ -189,6 +208,11 @@
       <textarea class="form-input" id="input-description"
                 bind:value={description}
                 placeholder={descriptionPlaceholder}></textarea>
+      {#if descriptionFilled}
+        <div class="form-input-hint text-success">
+          Description empty, save the bookmark to keep this.
+        </div>
+      {/if}
     {/if}
     {#if editNotes}
       <div class="form-label-row">
