@@ -8,10 +8,19 @@ export async function getCurrentTabInfo() {
     currentWindow: true,
   });
   const tab = tabs && tabs[0];
+  let url = "";
+  
+  if (tab) {
+    // The new URI API https://caniuse.com/url keep the final slash always
+    let url_api = new URL(tab.url);
+    // Sort the query parameters to make sure the URL is always the same
+    url_api.searchParams.sort();
+    url = url_api.toString();
+  }
 
   return {
     id: tab ? tab.id : "",
-    url: tab ? tab.url : "",
+    url: url,
     title: tab ? tab.title : "",
   };
 }
