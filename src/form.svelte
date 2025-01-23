@@ -85,7 +85,8 @@
     const existingBookmark = serverMetadata.bookmark;
     if (existingBookmark) {
       bookmarkExists = true;
-      if (title != ""){
+      // If there title on page and no title in the bookmark, show the hint
+      if (title != "" && existingBookmark.title == ""){
         titleFilled = true;
       }
       // keep the title if the current bookmark is empty
@@ -93,7 +94,8 @@
         title = existingBookmark.title;
       }
       tags = existingBookmark.tag_names ? existingBookmark.tag_names.join(" ") : "";
-      if (description != ""){
+      // If there description on page and no description in the bookmark, show the hint
+      if (description != "" && existingBookmark.description == ""){
         descriptionFilled = true;
       }
       // keep the description if the current bookmark is empty
