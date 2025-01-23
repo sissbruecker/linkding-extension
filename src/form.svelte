@@ -23,6 +23,8 @@
   let availableTagNames = []
   let bookmarkExists = false;
   let editNotes = false;
+  let titleFilled = false;
+  let descriptionFilled = false;
   let profile = null;
   let tabInfo = null;
   let extensionConfiguration = null;
@@ -83,9 +85,23 @@
     const existingBookmark = serverMetadata.bookmark;
     if (existingBookmark) {
       bookmarkExists = true;
-      title = existingBookmark.title;
+      // If there title on page and no title in the bookmark, show the hint
+      if (title != "" && existingBookmark.title == ""){
+        titleFilled = true;
+      }
+      // keep the title if the current bookmark is empty
+      if (existingBookmark.title != "") {
+        title = existingBookmark.title;
+      }
       tags = existingBookmark.tag_names ? existingBookmark.tag_names.join(" ") : "";
-      description = existingBookmark.description;
+      // If there description on page and no description in the bookmark, show the hint
+      if (description != "" && existingBookmark.description == ""){
+        descriptionFilled = true;
+      }
+      // keep the description if the current bookmark is empty
+      if (existingBookmark.description != "") {
+        description = existingBookmark.description;
+      }
       notes = existingBookmark.notes;
       unread = existingBookmark.unread;
       shared = existingBookmark.shared;
@@ -144,6 +160,44 @@
     editNotes = !editNotes;
   }
 
+  async function updateTitle() {
+    const [serverMetadata, browserMetadata] = await Promise.all([
+      loadServerMetadata(url),
+      getBrowserMetadata(url),
+    ]);
+
+    if (configuration.useBrowserMetadata) {
+      title = browserMetadata.title;
+    } else {
+      title = serverMetadata.metadata.title;
+    }
+
+    if (serverMetadata.bookmark.title != title) {
+      titleFilled = true;
+    } else {
+      titleFilled = false;
+    }
+  }
+
+  async function updateDescription() {
+    const [serverMetadata, browserMetadata] = await Promise.all([
+      loadServerMetadata(url),
+      getBrowserMetadata(url),
+    ]);
+
+    if (configuration.useBrowserMetadata) {
+      description = browserMetadata.description;
+    } else {
+      description = serverMetadata.metadata.description;
+    }
+
+    if (serverMetadata.bookmark.description != description) {
+      descriptionFilled = true;
+    } else {
+      descriptionFilled = false;
+    }
+  }
+
 </script>
 <div class="title-row">
   <h6>{bookmarkExists ? "Edit Bookmark" : "Add bookmark"}</h6>
@@ -176,19 +230,35 @@
     {/if}
   </div>
   <div class="form-group">
-    <label class="form-label" for="input-title">Title</label>
+    <div class="form-label-row">
+      <label class="form-label" for="input-title">Title</label>
+      <button type="button" class="btn btn-link" on:click|preventDefault={updateTitle}>Update</button>
+    </div>
     <input class="form-input" type="text" id="input-title"
            bind:value={title} placeholder={titlePlaceholder}>
+    {#if titleFilled}
+      <div class="form-input-hint text-success">
+        Title updated, save the bookmark to keep this.
+      </div>
+    {/if}
   </div>
   <div class="form-group">
     {#if !editNotes}
       <div class="form-label-row">
         <label class="form-label" for="input-description">Description</label>
-        <button type="button" class="btn btn-link" on:click|preventDefault={toggleNotes}>Edit notes</button>
+        <div class="form-label-row">
+          <button type="button" class="btn btn-link" on:click|preventDefault={toggleNotes}>Edit notes</button>
+          <button type="button" class="btn btn-link" on:click|preventDefault={updateDescription}>Update</button>
+        </div>
       </div>
-      <textarea class="form-input" id="input-description"
+      <textarea class="form-input" id="input-description" rows="3"
                 bind:value={description}
                 placeholder={descriptionPlaceholder}></textarea>
+      {#if descriptionFilled}
+        <div class="form-input-hint text-success">
+          Description updated, save the bookmark to keep this.
+        </div>
+      {/if}
     {/if}
     {#if editNotes}
       <div class="form-label-row">
