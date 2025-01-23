@@ -9,9 +9,10 @@ export async function getCurrentTabInfo() {
   });
   const tab = tabs && tabs[0];
 
+  // The new URI API https://caniuse.com/url keep the final slash always
   return {
     id: tab ? tab.id : "",
-    url: tab ? tab.url : "",
+    url: tab ? (new URL(tab.url)).href : "",
     title: tab ? tab.title : "",
   };
 }
