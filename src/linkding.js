@@ -23,10 +23,15 @@ export class LinkdingApi {
     });
   }
 
-  async saveBookmark(bookmark) {
+  async saveBookmark(bookmark, options = {}) {
     const configuration = this.configuration;
+    const query = ['disable_scraping'];
+    if (options.disable_html_snapshot) {
+      query.push('disable_html_snapshot');
+    }
+    const queryString = query.join('&');
 
-    return fetch(`${configuration.baseUrl}/api/bookmarks/?disable_scraping`, {
+    return fetch(`${configuration.baseUrl}/api/bookmarks/?${queryString}`, {
       method: "POST",
       headers: {
         Authorization: `Token ${configuration.token}`,

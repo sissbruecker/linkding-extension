@@ -8,6 +8,7 @@
   let unreadSelected = false;
   let shareSelected = false;
   let useBrowserMetadata = false;
+  let runSinglefile = false;
   let precacheEnabled = false;
   let closeAddBookmarkWindowOnSave = false;
   let closeAddBookmarkWindowOnSaveMs = 500;
@@ -22,6 +23,7 @@
     unreadSelected = config.unreadSelected;
     shareSelected = config.shareSelected;
     useBrowserMetadata = config.useBrowserMetadata;
+    runSinglefile = config.runSinglefile;
     precacheEnabled = config.precacheEnabled;
     closeAddBookmarkWindowOnSave = config.closeAddBookmarkWindowOnSave;
     closeAddBookmarkWindowOnSaveMs = config.closeAddBookmarkWindowOnSaveMs;
@@ -37,6 +39,7 @@
       unreadSelected,
       shareSelected,
       useBrowserMetadata,
+      runSinglefile,
       precacheEnabled,
       closeAddBookmarkWindowOnSave,
       closeAddBookmarkWindowOnSaveMs,
@@ -120,6 +123,25 @@
 
   <div class="form-group">
     <label class="form-checkbox">
+      <input type="checkbox" bind:checked={runSinglefile}>
+      <i class="form-icon"></i>
+      <span>Run Singlefile after adding new bookmark</span>
+    </label>
+    <div class="form-input-hint">
+      Run the Singlefile extension on the current tab after adding a new bookmark. This will save the current page as a
+      single HTML file and attach it as snapshot to the bookmark.
+      <br>
+      <br>
+      <strong>Note:</strong> This requires having the Singlefile extension installed in your browser, and the extension
+      must be configured to upload HTML files to the respective linkding REST API endpoint. You also need at least
+      version 1.39.0 of the linkding server. The communication with the Singlefile extension relies on the extension's
+      ID assigned by either the Chrome Web Store or the Firefox Add-ons store. If you have installed the extension
+      from a different source, this feature may not work.
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="form-checkbox">
       <input type="checkbox" bind:checked={precacheEnabled}>
       <i class="form-icon"></i>
       <span>Pre-load page information while browsing</span>
@@ -146,14 +168,17 @@
       <span>Automatically close the popup window after saving a bookmark</span>
     </label>
     <div class="form-input-hint">
-      The popup window will automatically close once you’ve saved a bookmark, otherwise by default it will remain open until you close it.
+      The popup window will automatically close once you’ve saved a bookmark, otherwise by default it will remain open
+      until you close it.
     </div>
   </div>
 
   {#if closeAddBookmarkWindowOnSave}
     <div class="form-group">
-      <label class="form-label" for="input-close-window-on-save-time">Popup window close time delay after saving a bookmark<span class="text-error">*</span></label>
-      <input class="form-input" type="number" id="input-close-window-on-save-time" bind:value={closeAddBookmarkWindowOnSaveMs}>
+      <label class="form-label" for="input-close-window-on-save-time">Popup window close time delay after saving a
+        bookmark<span class="text-error">*</span></label>
+      <input class="form-input" type="number" id="input-close-window-on-save-time"
+             bind:value={closeAddBookmarkWindowOnSaveMs}>
       <div class="form-input-hint">
         The time in milliseconds to wait before closing the bookmark popup window after saving a bookmark.
       </div>
@@ -189,15 +214,15 @@
   </div>
 </form>
 <style>
-    .status {
-        display: flex;
-        align-items: center;
-        gap: var(--unit-2);
-    }
+  .status {
+    display: flex;
+    align-items: center;
+    gap: var(--unit-2);
+  }
 
-    .button-row {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-    }
+  .button-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
 </style>

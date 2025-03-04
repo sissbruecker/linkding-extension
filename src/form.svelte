@@ -1,6 +1,6 @@
 <script>
   import TagAutocomplete from './TagAutocomplete.svelte'
-  import {getBrowserMetadata, getCurrentTabInfo, openOptions, showBadge} from "./browser";
+  import {getBrowserMetadata, getCurrentTabInfo, openOptions, showBadge, runSinglefile} from "./browser";
   import {loadServerMetadata, clearCachedServerMetadata} from "./cache";
   import {getProfile, updateProfile} from "./profile";
   import {getConfiguration} from "./configuration";
@@ -114,7 +114,9 @@
 
     try {
       saveState = "loading";
-      await api.saveBookmark(bookmark);
+      await api.saveBookmark(bookmark, {
+        disable_html_snapshot: extensionConfiguration?.runSinglefile
+      });
       await clearCachedServerMetadata();
       saveState = "success";
       // Show star badge on the tab to indicate that it's now bookmarked
@@ -123,11 +125,15 @@
       if (extensionConfiguration?.precacheEnabled) {
         showBadge(tabInfo.id);
       }
-
+      // Close popup window after saving the bookmark, if configured
       if (extensionConfiguration?.closeAddBookmarkWindowOnSave === true && extensionConfiguration?.closeAddBookmarkWindowOnSaveMs >= 0) {
         window.setTimeout(() => {
           window.close()
         }, extensionConfiguration?.closeAddBookmarkWindowOnSaveMs);
+      }
+      // Run singlefile, if configured
+      if (!bookmarkExists && extensionConfiguration?.runSinglefile) {
+        runSinglefile();
       }
     } catch (e) {
       saveState = "error";
@@ -239,47 +245,47 @@
 </form>
 
 <style>
-    form {
-        width: 100%;
-        max-width: 400px;
-    }
+  form {
+    width: 100%;
+    max-width: 400px;
+  }
 
-    .form-group {
-        margin-bottom: var(--unit-3) !important;
-    }
+  .form-group {
+    margin-bottom: var(--unit-3) !important;
+  }
 
-    .form-group .form-label {
-        margin-bottom: var(--unit-1) !important;
-    }
+  .form-group .form-label {
+    margin-bottom: var(--unit-1) !important;
+  }
 
-    .title-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-        padding-bottom: var(--unit-2);
-        border-bottom: solid 1px var(--secondary-border-color);
-    }
+  .title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: var(--unit-2);
+    border-bottom: solid 1px var(--secondary-border-color);
+  }
 
-    .form-label-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-    }
+  .form-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
 
-    .footer {
-        padding-top: var(--unit-4);
-        border-top: solid 1px var(--secondary-border-color);
-    }
+  .footer {
+    padding-top: var(--unit-4);
+    border-top: solid 1px var(--secondary-border-color);
+  }
 
-    .button-row {
-        display: flex;
-        justify-content: flex-end;
-    }
+  .button-row {
+    display: flex;
+    justify-content: flex-end;
+  }
 
-    .result-row {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: var(--unit-2);
-    }
+  .result-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--unit-2);
+  }
 </style>
