@@ -16,6 +16,10 @@ export async function getCurrentTabInfo() {
   };
 }
 
+function isFirefox() {
+  return typeof browser !== "undefined";
+}
+
 function useChromeScripting() {
   return typeof chrome !== "undefined" && !!chrome.scripting;
 }
@@ -145,4 +149,12 @@ export function removeBadge(tabId) {
   const browser = getBrowser();
   const action = browser.browserAction || browser.action;
   action.setBadgeText({ text: "", tabId: tabId });
+}
+
+export function runSinglefile() {
+  const browser = getBrowser();
+  const extensionId = isFirefox()
+    ? "{531906d3-e22f-4a6c-a102-8057b88a1a63}"
+    : "mpiodijhokgodhhofbcjdecpffjipkle";
+  browser.runtime.sendMessage(extensionId, "save-page");
 }
