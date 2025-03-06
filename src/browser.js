@@ -156,6 +156,5 @@ export function runSinglefile() {
   const extensionId = isFirefox()
     ? "{531906d3-e22f-4a6c-a102-8057b88a1a63}"
     : "mpiodijhokgodhhofbcjdecpffjipkle";
-  console.log("Trigger singlefile", extensionId);
   browser.runtime.sendMessage(extensionId, "save-page");
 }
