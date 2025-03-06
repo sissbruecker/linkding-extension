@@ -134,9 +134,8 @@
       <br>
       <strong>Note:</strong> This requires having the Singlefile extension installed in your browser, and the extension
       must be configured to upload HTML files to the respective linkding REST API endpoint. You also need at least
-      version 1.39.0 of the linkding server. The communication with the Singlefile extension relies on the extension's
-      ID assigned by either the Chrome Web Store or the Firefox Add-ons store. If you have installed the extension
-      from a different source, this feature may not work.
+      version 1.39.0 of the linkding server. See the <a href="https://linkding.link/archiving/" target="_blank">documentation</a>
+      for more information.
     </div>
   </div>
 
