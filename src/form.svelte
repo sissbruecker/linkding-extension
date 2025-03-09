@@ -4,6 +4,7 @@
   import {loadServerMetadata, clearCachedServerMetadata} from "./cache";
   import {getProfile, updateProfile} from "./profile";
   import {getConfiguration} from "./configuration";
+  import {onDestroy} from 'svelte';
 
   export let api;
   export let configuration;
@@ -27,6 +28,7 @@
   let tabInfo = null;
   let extensionConfiguration = null;
   let loading = false;
+  let timeoutId;
 
   $: {
     if (api && configuration) {
@@ -118,7 +120,17 @@
         disable_html_snapshot: extensionConfiguration?.runSinglefile
       });
       await clearCachedServerMetadata();
+
+      const tabInfo = await getCurrentTabInfo();
+      showBadge(tabInfo.id)
+
+      // Show success state, then reset it after a short delay
       saveState = "success";
+      timeoutId = setTimeout(() => {
+        saveState = "";
+        bookmarkExists = true;
+      }, 1500);
+
       // Show star badge on the tab to indicate that it's now bookmarked
       // but only if precaching is enabled, since the badge will never
       // show when browsing without precaching
@@ -141,6 +153,12 @@
       console.error(errorMessage);
     }
   }
+
+  onDestroy(() => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+  });
 
   function handleOptions() {
     openOptions();
