@@ -57,6 +57,10 @@
     tabInfo = await getCurrentTabInfo();
     url = tabInfo.url;
 
+    await reload();
+  }
+
+  async function reload() {
     loading = true;
     const [serverMetadata, browserMetadata] = await Promise.all([
       loadServerMetadata(url),
@@ -91,6 +95,12 @@
       shared = existingBookmark.shared;
       autoTags = "";
     } else {
+      bookmarkExists = false;
+      tags = "";
+      notes = "";
+      unread = false;
+      shared = false;
+
       // Only show auto tags for new bookmarks
       // Auto tags are only supported since v1.31.0, so we need to check if they are available
       const autoTagsList = serverMetadata.auto_tags;
@@ -160,7 +170,8 @@
     <label class="form-label" for="input-url">URL</label>
     <div class="has-icon-right">
       <input class="form-input" type="text" id="input-url" placeholder="URL"
-             bind:value={url}>
+             bind:value={url}
+             on:blur={reload}>
       {#if loading}
         <i class="form-icon loading"></i>
       {/if}
