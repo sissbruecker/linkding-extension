@@ -14,7 +14,7 @@ Works with: Firefox, Chrome
 
 ## Installation
 
-Firefox: [Mozilla Addon Store](https://addons.mozilla.org/de/firefox/addon/linkding-extension/)
+Firefox: [Mozilla Addon Store](https://addons.mozilla.org/firefox/addon/linkding-extension/)
 
 Chrome: [Chrome Web Store](https://chrome.google.com/webstore/detail/linkding-extension/beakmhbijpdhipnjhnclmhgjlddhidpe) 
 
