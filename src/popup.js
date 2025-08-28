@@ -44,18 +44,7 @@ export class Popup extends LitElement {
       ></ld-popup-form>
 
       ${!this.hasCompleteConfiguration
-        ? html`
-            <div class="modal active">
-              <div class="modal-overlay"></div>
-              <div class="modal-container">
-                <div class="modal-body">
-                  <div class="content">
-                    <ld-popup-intro></ld-popup-intro>
-                  </div>
-                </div>
-              </div>
-            </div>
-          `
+        ? html` <ld-popup-intro></ld-popup-intro> `
         : ""}
     `;
   }
