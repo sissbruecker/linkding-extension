@@ -1,2 +1,2 @@
-import './popup.js';
-import './options.js';
+import "./popup.js";
+import "./options.js";

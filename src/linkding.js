@@ -6,30 +6,27 @@ export class LinkdingApi {
   async getBookmark(bookmarkId) {
     const configuration = this.configuration;
 
-    return fetch(
-      `${configuration.baseUrl}/api/bookmarks/${bookmarkId}/`,
-      {
-        headers: {
-          Authorization: `Token ${configuration.token}`,
-        },
-      }
-    ).then((response) => {
+    return fetch(`${configuration.baseUrl}/api/bookmarks/${bookmarkId}/`, {
+      headers: {
+        Authorization: `Token ${configuration.token}`,
+      },
+    }).then((response) => {
       if (response.status === 200) {
         return response.json();
       }
       return Promise.reject(
-        `Error retrieving bookmark: ${response.statusText}`
+        `Error retrieving bookmark: ${response.statusText}`,
       );
     });
   }
 
   async saveBookmark(bookmark, options = {}) {
     const configuration = this.configuration;
-    const query = ['disable_scraping'];
+    const query = ["disable_scraping"];
     if (options.disable_html_snapshot) {
-      query.push('disable_html_snapshot');
+      query.push("disable_html_snapshot");
     }
-    const queryString = query.join('&');
+    const queryString = query.join("&");
 
     return fetch(`${configuration.baseUrl}/api/bookmarks/?${queryString}`, {
       method: "POST",
@@ -45,7 +42,7 @@ export class LinkdingApi {
         return response
           .json()
           .then((body) =>
-            Promise.reject(`Validation error: ${JSON.stringify(body)}`)
+            Promise.reject(`Validation error: ${JSON.stringify(body)}`),
           );
       } else {
         return Promise.reject(`Request error: ${response.statusText}`);
@@ -79,13 +76,13 @@ export class LinkdingApi {
         headers: {
           Authorization: `Token ${configuration.token}`,
         },
-      }
+      },
     ).then((response) => {
       if (response.status === 200) {
         return response.json().then((body) => body.results);
       }
       return Promise.reject(
-        `Error searching bookmarks: ${response.statusText}`
+        `Error searching bookmarks: ${response.statusText}`,
       );
     });
   }
@@ -94,19 +91,16 @@ export class LinkdingApi {
     const configuration = this.configuration;
     url = encodeURIComponent(url);
 
-    return fetch(
-      `${configuration.baseUrl}/api/bookmarks/check/?url=${url}`,
-      {
-        headers: {
-          Authorization: `Token ${configuration.token}`,
-        },
-      }
-    ).then((response) => {
+    return fetch(`${configuration.baseUrl}/api/bookmarks/check/?url=${url}`, {
+      headers: {
+        Authorization: `Token ${configuration.token}`,
+      },
+    }).then((response) => {
       if (response.status === 200) {
         return response.json();
       }
       return Promise.reject(
-        `Error checking bookmark URL: ${response.statusText}`
+        `Error checking bookmark URL: ${response.statusText}`,
       );
     });
   }
@@ -123,7 +117,7 @@ export class LinkdingApi {
         return response.json();
       }
       return Promise.reject(
-        `Error retrieving user profile: ${response.statusText}`
+        `Error retrieving user profile: ${response.statusText}`,
       );
     });
   }
@@ -136,7 +130,7 @@ export class LinkdingApi {
       },
     })
       .then((response) =>
-        response.status === 200 ? response.json() : Promise.reject(response)
+        response.status === 200 ? response.json() : Promise.reject(response),
       )
       .then((body) => !!body.results)
       .catch(() => false);

@@ -298,7 +298,7 @@ export class Options extends LitElement {
                   @input="${(e) =>
                     this.handleInputChange(
                       e,
-                      "closeAddBookmarkWindowOnSaveMs"
+                      "closeAddBookmarkWindowOnSaveMs",
                     )}"
                 />
                 <div class="form-input-hint">

@@ -38,8 +38,7 @@ export async function loadServerMetadata(url, precacheRequest = false) {
       console.error(e);
       return null;
     }
-  }
-  else {
+  } else {
     return null;
   }
 }

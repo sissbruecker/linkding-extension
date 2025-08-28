@@ -229,7 +229,9 @@ export class PopupForm extends LitElement {
   render() {
     return html`
       <div class="title-row">
-        <h1 class="h6">${this.bookmarkExists ? "Edit Bookmark" : "Add bookmark"}</h1>
+        <h1 class="h6">
+          ${this.bookmarkExists ? "Edit Bookmark" : "Add bookmark"}
+        </h1>
         <a
           href="#"
           @click="${(e) => {

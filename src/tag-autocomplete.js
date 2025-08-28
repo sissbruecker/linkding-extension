@@ -51,7 +51,7 @@ export class TagAutocomplete extends LitElement {
 
     this.suggestions = word
       ? this.tags.filter(
-          (tag) => tag.toLowerCase().indexOf(word.toLowerCase()) === 0
+          (tag) => tag.toLowerCase().indexOf(word.toLowerCase()) === 0,
         )
       : [];
 
@@ -64,7 +64,7 @@ export class TagAutocomplete extends LitElement {
 
   fireValueChange() {
     this.dispatchEvent(
-      new CustomEvent("value-change", { detail: { value: this.value } })
+      new CustomEvent("value-change", { detail: { value: this.value } }),
     );
   }
 
@@ -168,7 +168,7 @@ export class TagAutocomplete extends LitElement {
                   </div>
                 </a>
               </li>
-            `
+            `,
           )}
         </ul>
       </div>

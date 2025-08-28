@@ -1,4 +1,9 @@
-import { getBrowser, getCurrentTabInfo, showBadge, removeBadge } from "./browser";
+import {
+  getBrowser,
+  getCurrentTabInfo,
+  showBadge,
+  removeBadge,
+} from "./browser";
 import { loadServerMetadata } from "./cache";
 import { getConfiguration, isConfigurationComplete } from "./configuration";
 import { LinkdingApi } from "./linkding";
