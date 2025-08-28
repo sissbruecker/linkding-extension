@@ -19,10 +19,9 @@
   "dependencies": {
     "@rollup/plugin-commonjs": "^17.0.0",
     "@rollup/plugin-node-resolve": "^11.0.1",
+    "lit": "^3.3.1",
     "rollup": "^2.35.1",
-    "rollup-plugin-svelte": "^7.0.0",
-    "rollup-plugin-terser": "^7.0.2",
-    "svelte": "^3.31.0"
+    "rollup-plugin-terser": "^7.0.2"
   },
   "devDependencies": {
     "prettier": "^2.2.1",

@@ -1,14 +1,79 @@
+html {
+  /* Remove scrollbar gutter as it should never be shown in either popup or options */
+  scrollbar-gutter: initial;
+}
+
+html, body {
+  padding: 0;
+  margin: 0;
+}
+
 body {
     padding: var(--unit-4);
     min-width: 400px;
 }
 
-/* Override responsive styles that change font-size on inputs */
-.form-input {
-    font-size: var(--font-size) !important;
+.bookmark-form {
+  form {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .form-group {
+    margin-bottom: var(--unit-3) !important;
+  }
+
+  .form-group .form-label {
+    margin-bottom: var(--unit-1) !important;
+  }
+
+  .title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: var(--unit-2);
+    border-bottom: solid 1px var(--secondary-border-color);
+  }
+
+  .form-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .footer {
+    padding-top: var(--unit-4);
+    border-top: solid 1px var(--secondary-border-color);
+  }
+
+  .button-row {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .result-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--unit-2);
+  }
 }
 
-/* Remove scrollbar gutter as it should never be shown in either popup or options */
-html {
-    scrollbar-gutter: initial;
+.options {
+  .status {
+    display: flex;
+    align-items: center;
+    gap: var(--unit-2);
+  }
+
+  .button-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+}
+
+.form-input {
+  /* Override responsive styles that change font-size on inputs */
+  font-size: var(--font-size) !important;
 }
