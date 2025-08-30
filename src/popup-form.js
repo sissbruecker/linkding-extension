@@ -409,7 +409,7 @@ export class PopupForm extends LitElement {
                       : ""}"
                     ?disabled="${this.saveState === "loading"}"
                   >
-                    Save
+                    ${this.bookmarkExists ? "Update" : "Add"}
                   </button>
                 </div>
               `
