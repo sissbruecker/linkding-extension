@@ -5,6 +5,7 @@ import {
   getCurrentTabInfo,
   openOptions,
   showBadge,
+  removeBadge,
   runSinglefile,
 } from "./browser.js";
 import { loadServerMetadata, clearCachedServerMetadata } from "./cache.js";
@@ -34,6 +35,8 @@ export class PopupForm extends LitElement {
     tabInfo: { type: Object, state: true },
     extensionConfiguration: { type: Object, state: true },
     loading: { type: Boolean, state: true },
+    bookmarkId: { type: Number, state: true },
+    deleteBookmark: { type: Boolean, state: true },
   };
 
   constructor() {
@@ -59,6 +62,8 @@ export class PopupForm extends LitElement {
     this.tabInfo = null;
     this.extensionConfiguration = null;
     this.loading = false;
+    this.bookmarkId = null;
+    this.deleteBookmark = false;
   }
 
   createRenderRoot() {
@@ -136,6 +141,7 @@ export class PopupForm extends LitElement {
     const existingBookmark = serverMetadata.bookmark;
     if (existingBookmark) {
       this.bookmarkExists = true;
+      this.bookmarkId = existingBookmark.id;
       this.title = existingBookmark.title;
       this.tags = existingBookmark.tag_names
         ? existingBookmark.tag_names.join(" ")
@@ -224,6 +230,36 @@ export class PopupForm extends LitElement {
   handleInputChange(e, property) {
     this[property] =
       e.target.type === "checkbox" ? e.target.checked : e.target.value;
+  }
+
+  toggleDeleteBookmark() {
+    this.deleteBookmark = !this.deleteBookmark;
+  }
+
+  async handleDeleteBookmark() {
+    try {
+      this.saveState = "loading";
+      await this.api.deleteBookmark(this.bookmarkId, {});
+      await clearCachedServerMetadata();
+      this.saveState = "success";
+      // Hide star badge on the tab to indicate that it's not bookmarked now
+      removeBadge(this.tabInfo.id);
+
+      // Close popup window after saving the bookmark, if configured
+      if (
+        this.extensionConfiguration?.closeAddBookmarkWindowOnSave === true &&
+        this.extensionConfiguration?.closeAddBookmarkWindowOnSaveMs >= 0
+      ) {
+        window.setTimeout(() => {
+          window.close();
+        }, this.extensionConfiguration?.closeAddBookmarkWindowOnSaveMs);
+      }
+
+    } catch (e) {
+      this.saveState = "error";
+      this.errorMessage = e.toString();
+      console.error(this.errorMessage);
+    }
   }
 
   render() {
@@ -387,7 +423,7 @@ export class PopupForm extends LitElement {
                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                     <path d="M5 12l5 5l10 -10" />
                   </svg>
-                  <span>Bookmark saved</span>
+                  <span>${this.deleteBookmark ? "Bookmark deleted" : "Bookmark saved"}</span>
                 </div>
               `
             : ""}
@@ -401,6 +437,48 @@ export class PopupForm extends LitElement {
           ${this.saveState !== "success"
             ? html`
                 <div class="button-row">
+                  ${this.bookmarkExists
+                    ? html`
+                      <button
+                        type="button"
+                        class="btn btn-error btn-wide ${this.deleteBookmark ? "d-none" : ""}"
+                        @click="${(e) => {
+                          e.preventDefault();
+                          this.toggleDeleteBookmark();
+                        }}"
+                        >
+                          Delete
+                        </button>
+                      <div class="${!this.deleteBookmark ? "d-none" : ""}">
+                        <button
+                          type="button"
+                          class="btn btn-wide"
+                          @click="${(e) => {
+                            e.preventDefault();
+                            this.toggleDeleteBookmark();
+                          }}"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-error btn-wide ${
+                            this.saveState === "loading"
+                            ? "loading"
+                            : ""
+                          }"
+                          ?disabled="${this.saveState === "loading"}"
+                          @click="${(e) => {
+                            e.preventDefault();
+                            this.handleDeleteBookmark();
+                          }}"
+                        >
+                          Confirm
+                        </button>
+                      </div>
+                    `
+                    :""}
+                  <span style="flex:1;"></span>
                   <button
                     type="submit"
                     class="btn btn-primary btn-wide ${this.saveState ===
