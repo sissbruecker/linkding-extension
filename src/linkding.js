@@ -135,4 +135,35 @@ export class LinkdingApi {
       .then((body) => !!body.results)
       .catch(() => false);
   }
+
+  async deleteBookmark(bookmarkId) {
+    const configuration = this.configuration;
+
+    if(!bookmarkId || bookmarkId <= 0) {
+      return Promise.reject(`Invalid bookmark ID: ${bookmarkId}`);
+    }
+
+    return fetch(`${configuration.baseUrl}/api/bookmarks/${bookmarkId}/`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Token ${configuration.token}`,
+        "Content-Type": "application/json",
+      },
+      body: '',
+    }).then((response) => {
+      if (response.status === 201) {
+        return response.json();
+      } else if (response.status === 204) {
+        return null;
+      } else if (response.status === 400) {
+        return response
+          .json()
+          .then((body) =>
+            Promise.reject(`Validation error: ${JSON.stringify(body)}`)
+          );
+      } else {
+        return Promise.reject(`Request error: ${response.statusText}`);
+      }
+    });
+  }
 }
