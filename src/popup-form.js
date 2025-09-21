@@ -1,6 +1,7 @@
 import { LitElement, html } from "lit";
 import "./tag-autocomplete.js";
 import {
+  getBrowser,
   getBrowserMetadata,
   getCurrentTabInfo,
   openOptions,
@@ -107,6 +108,18 @@ export class PopupForm extends LitElement {
   async initForm() {
     this.tabInfo = await getCurrentTabInfo();
     this.url = this.tabInfo.url;
+
+    const isNewTab =
+      this.url === "chrome://newtab/" ||
+      this.url === "about:newtab" ||
+      this.url === "edge://newtab/";
+
+    if (isNewTab && this.configuration && this.configuration.baseUrl) {
+      const bookmarksUrl = `${this.configuration.baseUrl}/bookmarks`;
+      getBrowser().tabs.update({ url: bookmarksUrl });
+      window.close();
+      return;
+    }
 
     this.loading = true;
 
