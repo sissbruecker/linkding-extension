@@ -29,10 +29,14 @@ body {
 
   .title-row {
     display: flex;
-    justify-content: space-between;
-    align-items: baseline;
+    align-items: flex-start;
     padding-bottom: var(--unit-2);
     border-bottom: solid 1px var(--secondary-border-color);
+
+    button {
+      padding: 0;
+      height: auto;
+    }
   }
 
   .form-label-row {

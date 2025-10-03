@@ -7,6 +7,7 @@ import {
   showBadge,
   runSinglefile,
   removeBadge,
+  createTab,
 } from "./browser.js";
 import { loadServerMetadata, clearCachedServerMetadata } from "./cache.js";
 import { getProfile, updateProfile } from "./profile.js";
@@ -241,8 +242,15 @@ export class PopupForm extends LitElement {
     }
   }
 
-  handleOptions() {
+  handleOptions(e) {
+    e.preventDefault();
     openOptions();
+  }
+
+  handleOpenLinkding(e) {
+    e.preventDefault();
+    createTab(this.configuration.baseUrl);
+    window.close();
   }
 
   toggleNotes() {
@@ -264,14 +272,7 @@ export class PopupForm extends LitElement {
         <h1 class="h6">
           ${this.existingBookmark ? "Edit Bookmark" : "Add bookmark"}
         </h1>
-        <a
-          href="#"
-          @click="${(e) => {
-            e.preventDefault();
-            this.handleOptions();
-          }}"
-          >Options</a
-        >
+        ${this.renderHeaderActions()}
       </div>
       <form class="form" @submit="${this.handleSubmit}">
         <div class="form-group">
@@ -446,6 +447,27 @@ export class PopupForm extends LitElement {
       </form>
 
       ${this.deleteConfirmVisible ? this.renderDeleteConfirmation() : nothing}
+    `;
+  }
+
+  renderHeaderActions() {
+    return html`
+      <button
+        type="button"
+        class="btn btn-link ml-auto"
+        @click="${this.handleOptions}"
+        title="Options"
+      >
+        ${icons.options()}
+      </button>
+      <button
+        type="button"
+        class="btn btn-link ml-4"
+        @click="${this.handleOpenLinkding}"
+        title="Open Linkding"
+      >
+        ${icons.externalLink()}
+      </button>
     `;
   }
 

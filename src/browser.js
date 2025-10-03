@@ -158,3 +158,8 @@ export function runSinglefile() {
     : "mpiodijhokgodhhofbcjdecpffjipkle";
   browser.runtime.sendMessage(extensionId, "save-page");
 }
+
+export function createTab(url) {
+  const browser = getBrowser();
+  browser.tabs.create({ url });
+}
