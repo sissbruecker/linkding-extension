@@ -48,7 +48,7 @@ body {
 
   .button-row {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
   }
 
   .result-row {

@@ -1,4 +1,4 @@
-import { LitElement, html } from "lit";
+import { LitElement, html, nothing } from "lit";
 import "./tag-autocomplete.js";
 import {
   getBrowserMetadata,
@@ -6,10 +6,12 @@ import {
   openOptions,
   showBadge,
   runSinglefile,
+  removeBadge,
 } from "./browser.js";
 import { loadServerMetadata, clearCachedServerMetadata } from "./cache.js";
 import { getProfile, updateProfile } from "./profile.js";
 import { getConfiguration } from "./configuration.js";
+import { icons } from "./icons";
 
 export class PopupForm extends LitElement {
   static properties = {
@@ -28,12 +30,13 @@ export class PopupForm extends LitElement {
     saveState: { type: String, state: true },
     errorMessage: { type: String, state: true },
     availableTagNames: { type: Array, state: true },
-    bookmarkExists: { type: Boolean, state: true },
+    existingBookmark: { type: Object, state: true },
     editNotes: { type: Boolean, state: true },
     profile: { type: Object, state: true },
     tabInfo: { type: Object, state: true },
     extensionConfiguration: { type: Object, state: true },
     loading: { type: Boolean, state: true },
+    deleteConfirmVisible: { type: Boolean, state: true },
   };
 
   constructor() {
@@ -53,12 +56,13 @@ export class PopupForm extends LitElement {
     this.saveState = "";
     this.errorMessage = "";
     this.availableTagNames = [];
-    this.bookmarkExists = false;
+    this.existingBookmark = null;
     this.editNotes = false;
     this.profile = null;
     this.tabInfo = null;
     this.extensionConfiguration = null;
     this.loading = false;
+    this.deleteConfirmVisible = false;
   }
 
   createRenderRoot() {
@@ -135,7 +139,7 @@ export class PopupForm extends LitElement {
 
     const existingBookmark = serverMetadata.bookmark;
     if (existingBookmark) {
-      this.bookmarkExists = true;
+      this.existingBookmark = existingBookmark;
       this.title = existingBookmark.title;
       this.tags = existingBookmark.tag_names
         ? existingBookmark.tag_names.join(" ")
@@ -199,9 +203,37 @@ export class PopupForm extends LitElement {
       }
 
       // Run singlefile, if configured
-      if (!this.bookmarkExists && this.extensionConfiguration?.runSinglefile) {
+      if (
+        !this.existingBookmark &&
+        this.extensionConfiguration?.runSinglefile
+      ) {
         runSinglefile();
       }
+    } catch (e) {
+      this.saveState = "error";
+      this.errorMessage = e.toString();
+      console.error(this.errorMessage);
+    }
+  }
+
+  showDeleteConfirmation() {
+    this.deleteConfirmVisible = true;
+  }
+
+  cancelDelete() {
+    this.deleteConfirmVisible = false;
+  }
+
+  async confirmDelete() {
+    if (!this.existingBookmark) {
+      return;
+    }
+
+    try {
+      await this.api.deleteBookmark(this.existingBookmark.id);
+      await clearCachedServerMetadata();
+      removeBadge(this.tabInfo.id);
+      window.close();
     } catch (e) {
       this.saveState = "error";
       this.errorMessage = e.toString();
@@ -230,7 +262,7 @@ export class PopupForm extends LitElement {
     return html`
       <div class="title-row">
         <h1 class="h6">
-          ${this.bookmarkExists ? "Edit Bookmark" : "Add bookmark"}
+          ${this.existingBookmark ? "Edit Bookmark" : "Add bookmark"}
         </h1>
         <a
           href="#"
@@ -255,7 +287,7 @@ export class PopupForm extends LitElement {
             />
             ${this.loading ? html`<i class="form-icon loading"></i>` : ""}
           </div>
-          ${this.bookmarkExists
+          ${this.existingBookmark
             ? html`
                 <div class="form-input-hint text-warning">
                   This URL is already bookmarked. The form has been prefilled
@@ -373,20 +405,7 @@ export class PopupForm extends LitElement {
           ${this.saveState === "success"
             ? html`
                 <div class="result-row text-success">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path d="M5 12l5 5l10 -10" />
-                  </svg>
+                  ${icons.success()}
                   <span>Bookmark saved</span>
                 </div>
               `
@@ -401,12 +420,21 @@ export class PopupForm extends LitElement {
           ${this.saveState !== "success"
             ? html`
                 <div class="button-row">
+                  ${this.existingBookmark
+                    ? html`
+                        <button
+                          type="button"
+                          class="btn btn-error"
+                          aria-label="Delete bookmark"
+                          @click="${this.showDeleteConfirmation}"
+                        >
+                          ${icons.delete()}
+                        </button>
+                      `
+                    : nothing}
                   <button
                     type="submit"
-                    class="btn btn-primary btn-wide ${this.saveState ===
-                    "loading"
-                      ? "loading"
-                      : ""}"
+                    class="btn btn-primary btn-wide ml-auto ${this.saveState}"
                     ?disabled="${this.saveState === "loading"}"
                   >
                     Save
@@ -416,6 +444,38 @@ export class PopupForm extends LitElement {
             : ""}
         </div>
       </form>
+
+      ${this.deleteConfirmVisible ? this.renderDeleteConfirmation() : nothing}
+    `;
+  }
+
+  renderDeleteConfirmation() {
+    return html`
+      <div class="modal active">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+          <div class="modal-header">
+            <h2 class="h6">Delete bookmark?</h2>
+          </div>
+          <div class="modal-body">
+            <div class="content">
+              Are you sure you want to delete this bookmark?
+            </div>
+          </div>
+          <div class="modal-footer d-flex justify-between mt-2">
+            <button type="button" class="btn" @click="${this.cancelDelete}">
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="btn btn-error"
+              @click="${this.confirmDelete}"
+            >
+              Confirm
+            </button>
+          </div>
+        </div>
+      </div>
     `;
   }
 }
