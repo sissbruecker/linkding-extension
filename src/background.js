@@ -5,7 +5,7 @@ import {
   removeBadge,
   showSuccessBadge,
 } from "./browser";
-import { loadServerMetadata, clearCachedServerMetadata } from "./cache";
+import { loadServerMetadata } from "./cache";
 import { getConfiguration, isConfigurationComplete } from "./configuration";
 import { LinkdingApi } from "./linkding";
 
