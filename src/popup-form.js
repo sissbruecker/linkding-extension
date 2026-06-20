@@ -27,6 +27,7 @@ export class PopupForm extends LitElement {
     tags: { type: String, state: true },
     autoTags: { type: String, state: true },
     unread: { type: Boolean, state: true },
+    savePage: { type: Boolean, state: true },
     shared: { type: Boolean, state: true },
     saveState: { type: String, state: true },
     errorMessage: { type: String, state: true },
@@ -53,6 +54,7 @@ export class PopupForm extends LitElement {
     this.tags = "";
     this.autoTags = "";
     this.unread = false;
+    this.savePage = true;
     this.shared = false;
     this.saveState = "";
     this.errorMessage = "";
@@ -180,7 +182,7 @@ export class PopupForm extends LitElement {
       this.saveState = "loading";
 
       await this.api.saveBookmark(bookmark, {
-        disable_html_snapshot: this.extensionConfiguration?.runSinglefile,
+        disable_html_snapshot: this.extensionConfiguration?.runSinglefile && this.savePage,
       });
       await clearCachedServerMetadata();
 
@@ -207,6 +209,7 @@ export class PopupForm extends LitElement {
       if (
         !this.existingBookmark &&
         this.extensionConfiguration?.runSinglefile
+        && this.savePage
       ) {
         runSinglefile();
       }
@@ -388,6 +391,19 @@ export class PopupForm extends LitElement {
             <i class="form-icon"></i>
             <span>Mark as unread</span>
           </label>
+          ${this.extensionConfiguration?.runSinglefile
+            ? html`
+              <label class="form-checkbox">
+                <input
+                  type="checkbox"
+                  .checked="${this.savePage}"
+                  @change="${(e) => this.handleInputChange(e, "savePage")}"
+                />
+                <i class="form-icon"></i>
+                <span>Save page content</span>
+              </label>
+              `
+            : ""}
           ${this.profile?.enable_sharing
             ? html`
                 <label class="form-checkbox ml-4">
