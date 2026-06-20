@@ -3,6 +3,7 @@ import "./tag-autocomplete.js";
 import {
   getBrowserMetadata,
   getCurrentTabInfo,
+  getPageContentPreview,
   openOptions,
   showBadge,
   runSinglefile,
@@ -13,6 +14,7 @@ import { loadServerMetadata, clearCachedServerMetadata } from "./cache.js";
 import { getProfile, updateProfile } from "./profile.js";
 import { getConfiguration } from "./configuration.js";
 import { icons } from "./icons";
+import { isAiSuggestionConfigured, suggestBookmarkMetadata } from "./ai.js";
 
 export class PopupForm extends LitElement {
   static properties = {
@@ -38,6 +40,10 @@ export class PopupForm extends LitElement {
     extensionConfiguration: { type: Object, state: true },
     loading: { type: Boolean, state: true },
     deleteConfirmVisible: { type: Boolean, state: true },
+    aiSuggestionState: { type: String, state: true },
+    aiSuggestionError: { type: String, state: true },
+    aiSuggestedTags: { type: Array, state: true },
+    aiSuggestedDescription: { type: String, state: true },
   };
 
   constructor() {
@@ -64,6 +70,12 @@ export class PopupForm extends LitElement {
     this.extensionConfiguration = null;
     this.loading = false;
     this.deleteConfirmVisible = false;
+    this.aiSuggestionState = "";
+    this.aiSuggestionError = "";
+    this.aiSuggestedTags = [];
+    this.aiSuggestedDescription = "";
+    this.pageExcerpt = "";
+    this.pageExcerptPromise = null;
   }
 
   createRenderRoot() {
@@ -74,6 +86,7 @@ export class PopupForm extends LitElement {
     super.firstUpdated(props);
 
     this.classList.add("bookmark-form");
+    this.startPageExcerptLoad();
   }
 
   updated(changedProperties) {
@@ -112,6 +125,7 @@ export class PopupForm extends LitElement {
   async initForm() {
     this.tabInfo = await getCurrentTabInfo();
     this.url = this.tabInfo.url;
+    this.startPageExcerptLoad();
 
     this.loading = true;
 
@@ -261,9 +275,122 @@ export class PopupForm extends LitElement {
     this.tags = e.detail.value;
   }
 
+  startPageExcerptLoad() {
+    if (this.pageExcerptPromise) {
+      return this.pageExcerptPromise;
+    }
+
+    this.pageExcerptPromise = getPageContentPreview()
+      .then((pageExcerpt) => {
+        this.pageExcerpt = pageExcerpt || "";
+        return this.pageExcerpt;
+      })
+      .catch((e) => {
+        console.error("Failed to preload page content preview", e);
+        this.pageExcerpt = "";
+        return "";
+      });
+
+    return this.pageExcerptPromise;
+  }
+
+  async handleSuggest(e) {
+    e.preventDefault();
+
+    if (!isAiSuggestionConfigured(this.extensionConfiguration)) {
+      this.aiSuggestionState = "error";
+      this.aiSuggestionError = "AI suggestions are not configured.";
+      return;
+    }
+
+    try {
+      this.aiSuggestionState = "reading";
+      this.aiSuggestionError = "";
+      this.aiSuggestedTags = [];
+      this.aiSuggestedDescription = "";
+
+      const pageExcerpt =
+        this.pageExcerpt || (await this.startPageExcerptLoad());
+
+      this.aiSuggestionState = "loading";
+      const suggestion = await suggestBookmarkMetadata(
+        this.extensionConfiguration,
+        {
+          url: this.url,
+          title: this.title,
+          description: this.description,
+          tags: this.getCurrentTagNames(),
+          autoTags: this.autoTags ? this.autoTags.split(" ") : [],
+          availableTags: this.availableTagNames,
+          pageExcerpt,
+        },
+      );
+
+      this.aiSuggestedTags = suggestion.tags;
+      this.aiSuggestedDescription = suggestion.description;
+      this.aiSuggestionState = "success";
+    } catch (e) {
+      this.aiSuggestionState = "error";
+      this.aiSuggestionError = e.message || "AI unavailable. Edit manually.";
+      console.error(this.aiSuggestionError);
+    }
+  }
+
+  applySuggestedTags(e) {
+    e.preventDefault();
+    this.tags = this.mergeTags(this.getCurrentTagNames(), this.aiSuggestedTags)
+      .join(" ")
+      .trim();
+  }
+
+  applySuggestedTag(e, tag) {
+    e.preventDefault();
+    this.tags = this.mergeTags(this.getCurrentTagNames(), [tag]).join(" ");
+  }
+
+  applySuggestedDescription(e) {
+    e.preventDefault();
+    this.description = this.aiSuggestedDescription;
+  }
+
   handleInputChange(e, property) {
     this[property] =
       e.target.type === "checkbox" ? e.target.checked : e.target.value;
+  }
+
+  getCurrentTagNames() {
+    return this.tags
+      .split(" ")
+      .map((tag) => tag.trim())
+      .filter((tag) => !!tag);
+  }
+
+  mergeTags(currentTags, suggestedTags) {
+    const seen = new Set();
+    return [...currentTags, ...suggestedTags].filter((tag) => {
+      const key = tag.toLowerCase();
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
+  }
+
+  isAiSuggestionBusy() {
+    return ["reading", "loading"].includes(this.aiSuggestionState);
+  }
+
+  getAiSuggestionButtonText() {
+    if (this.aiSuggestionState === "reading") {
+      return "Reading page...";
+    }
+
+    if (this.aiSuggestionState === "loading") {
+      return "Suggesting...";
+    }
+
+    return "Suggest";
   }
 
   render() {
@@ -299,7 +426,21 @@ export class PopupForm extends LitElement {
             : ""}
         </div>
         <div class="form-group">
-          <label class="form-label" for="input-tags">Tags</label>
+          <div class="form-label-row">
+            <label class="form-label" for="input-tags">Tags</label>
+            ${isAiSuggestionConfigured(this.extensionConfiguration)
+              ? html`
+                  <button
+                    type="button"
+                    class="btn btn-link"
+                    @click="${this.handleSuggest}"
+                    ?disabled="${this.isAiSuggestionBusy()}"
+                  >
+                    ${this.getAiSuggestionButtonText()}
+                  </button>
+                `
+              : nothing}
+          </div>
           <ld-tag-autocomplete
             inputid="input-tags"
             inputname="${this.tags}"
@@ -314,6 +455,7 @@ export class PopupForm extends LitElement {
                 </div>
               `
             : ""}
+          ${this.renderAiSuggestion()}
         </div>
         <div class="form-group">
           <label class="form-label" for="input-title">Title</label>
@@ -447,6 +589,78 @@ export class PopupForm extends LitElement {
       </form>
 
       ${this.deleteConfirmVisible ? this.renderDeleteConfirmation() : nothing}
+    `;
+  }
+
+  renderAiSuggestion() {
+    if (this.aiSuggestionState === "reading") {
+      return html` <div class="form-input-hint">Reading page...</div> `;
+    }
+
+    if (this.aiSuggestionState === "loading") {
+      return html` <div class="form-input-hint">Suggesting...</div> `;
+    }
+
+    if (this.aiSuggestionState === "error") {
+      return html`
+        <div class="form-input-hint text-error">${this.aiSuggestionError}</div>
+      `;
+    }
+
+    if (
+      this.aiSuggestionState !== "success" ||
+      (!this.aiSuggestedTags.length && !this.aiSuggestedDescription)
+    ) {
+      return nothing;
+    }
+
+    return html`
+      <div class="ai-suggestion-panel">
+        ${this.aiSuggestedTags.length
+          ? html`
+              <div class="ai-suggestion-section">
+                <div class="ai-suggestion-label">Suggested tags</div>
+                <div class="ai-tag-list">
+                  ${this.aiSuggestedTags.map(
+                    (tag) => html`
+                      <button
+                        type="button"
+                        class="btn btn-sm ai-tag"
+                        @click="${(e) => this.applySuggestedTag(e, tag)}"
+                      >
+                        ${tag}
+                      </button>
+                    `,
+                  )}
+                  <button
+                    type="button"
+                    class="btn btn-link btn-sm"
+                    @click="${this.applySuggestedTags}"
+                  >
+                    Apply all
+                  </button>
+                </div>
+              </div>
+            `
+          : nothing}
+        ${this.aiSuggestedDescription
+          ? html`
+              <div class="ai-suggestion-section">
+                <div class="ai-suggestion-label">Suggested description</div>
+                <div class="ai-description-preview">
+                  ${this.aiSuggestedDescription}
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-sm"
+                  @click="${this.applySuggestedDescription}"
+                >
+                  Apply description
+                </button>
+              </div>
+            `
+          : nothing}
+      </div>
     `;
   }
 

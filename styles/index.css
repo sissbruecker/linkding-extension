@@ -3,14 +3,15 @@ html {
   scrollbar-gutter: initial;
 }
 
-html, body {
+html,
+body {
   padding: 0;
   margin: 0;
 }
 
 body {
-    padding: var(--unit-4);
-    min-width: 400px;
+  padding: var(--unit-4);
+  min-width: 400px;
 }
 
 .bookmark-form {
@@ -60,6 +61,41 @@ body {
     justify-content: center;
     align-items: center;
     gap: var(--unit-2);
+  }
+
+  .ai-suggestion-panel {
+    border: solid 1px var(--secondary-border-color);
+    border-radius: var(--border-radius);
+    margin-top: var(--unit-2);
+    padding: var(--unit-2);
+  }
+
+  .ai-suggestion-section:not(:last-child) {
+    margin-bottom: var(--unit-2);
+  }
+
+  .ai-suggestion-label {
+    color: var(--secondary-text-color);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    margin-bottom: var(--unit-1);
+  }
+
+  .ai-tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--unit-1);
+  }
+
+  .ai-tag {
+    color: var(--alternative-color);
+  }
+
+  .ai-description-preview {
+    background: var(--body-color-contrast);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--unit-2);
+    padding: var(--unit-2);
   }
 }
 

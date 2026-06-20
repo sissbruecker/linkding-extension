@@ -10,6 +10,10 @@ const DEFAULTS = {
   precacheEnabled: false,
   closeAddBookmarkWindowOnSave: false,
   closeAddBookmarkWindowOnSaveMs: 500,
+  aiSuggestionsEnabled: false,
+  aiEndpoint: "https://api.openai.com/v1/chat/completions",
+  aiApiKey: "",
+  aiModel: "gpt-4o-mini",
 };
 
 export async function getConfiguration() {

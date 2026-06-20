@@ -15,6 +15,10 @@ export class Options extends LitElement {
     precacheEnabled: { type: Boolean, state: true },
     closeAddBookmarkWindowOnSave: { type: Boolean, state: true },
     closeAddBookmarkWindowOnSaveMs: { type: Number, state: true },
+    aiSuggestionsEnabled: { type: Boolean, state: true },
+    aiEndpoint: { type: String, state: true },
+    aiApiKey: { type: String, state: true },
+    aiModel: { type: String, state: true },
     isSuccess: { type: Boolean, state: true },
     isError: { type: Boolean, state: true },
   };
@@ -31,6 +35,10 @@ export class Options extends LitElement {
     this.precacheEnabled = false;
     this.closeAddBookmarkWindowOnSave = false;
     this.closeAddBookmarkWindowOnSaveMs = 500;
+    this.aiSuggestionsEnabled = false;
+    this.aiEndpoint = "";
+    this.aiApiKey = "";
+    this.aiModel = "";
     this.isSuccess = false;
     this.isError = false;
   }
@@ -58,6 +66,10 @@ export class Options extends LitElement {
     this.precacheEnabled = config.precacheEnabled;
     this.closeAddBookmarkWindowOnSave = config.closeAddBookmarkWindowOnSave;
     this.closeAddBookmarkWindowOnSaveMs = config.closeAddBookmarkWindowOnSaveMs;
+    this.aiSuggestionsEnabled = config.aiSuggestionsEnabled;
+    this.aiEndpoint = config.aiEndpoint;
+    this.aiApiKey = config.aiApiKey;
+    this.aiModel = config.aiModel;
   }
 
   async handleSubmit(e) {
@@ -73,6 +85,10 @@ export class Options extends LitElement {
       precacheEnabled: this.precacheEnabled,
       closeAddBookmarkWindowOnSave: this.closeAddBookmarkWindowOnSave,
       closeAddBookmarkWindowOnSaveMs: this.closeAddBookmarkWindowOnSaveMs,
+      aiSuggestionsEnabled: this.aiSuggestionsEnabled,
+      aiEndpoint: this.aiEndpoint,
+      aiApiKey: this.aiApiKey,
+      aiModel: this.aiModel,
     };
 
     const testResult = await new LinkdingApi(config).testConnection(config);
@@ -306,6 +322,79 @@ export class Options extends LitElement {
                   The time in milliseconds to wait before closing the bookmark
                   popup window after saving a bookmark.
                 </div>
+              </div>
+            `
+          : ""}
+
+        <div class="divider"></div>
+
+        <div class="form-group">
+          <label class="form-checkbox">
+            <input
+              type="checkbox"
+              .checked="${this.aiSuggestionsEnabled}"
+              @change="${(e) =>
+                this.handleInputChange(e, "aiSuggestionsEnabled")}"
+            />
+            <i class="form-icon"></i>
+            <span>Enable AI suggestions</span>
+          </label>
+          <div class="form-input-hint">
+            Adds a manual Suggest button to the bookmark popup. The extension
+            sends the current URL, title, description, tags, and a limited list
+            of existing tags only when you click that button.
+          </div>
+        </div>
+
+        ${this.aiSuggestionsEnabled
+          ? html`
+              <div class="form-group">
+                <label class="form-label" for="input-ai-endpoint"
+                  >AI API Endpoint <span class="text-error">*</span></label
+                >
+                <input
+                  class="form-input"
+                  type="text"
+                  id="input-ai-endpoint"
+                  placeholder="https://api.openai.com/v1/chat/completions"
+                  .value="${this.aiEndpoint}"
+                  @input="${(e) => this.handleInputChange(e, "aiEndpoint")}"
+                />
+                <div class="form-input-hint">
+                  Use an OpenAI-compatible chat completions endpoint.
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="input-ai-api-key"
+                  >AI API Key</label
+                >
+                <input
+                  class="form-input"
+                  type="password"
+                  id="input-ai-api-key"
+                  placeholder="API key"
+                  .value="${this.aiApiKey}"
+                  @input="${(e) => this.handleInputChange(e, "aiApiKey")}"
+                />
+                <div class="form-input-hint">
+                  Stored in browser extension storage. Leave empty only if your
+                  endpoint does not require a bearer token.
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="input-ai-model"
+                  >AI Model <span class="text-error">*</span></label
+                >
+                <input
+                  class="form-input"
+                  type="text"
+                  id="input-ai-model"
+                  placeholder="gpt-4o-mini"
+                  .value="${this.aiModel}"
+                  @input="${(e) => this.handleInputChange(e, "aiModel")}"
+                />
               </div>
             `
           : ""}

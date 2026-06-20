@@ -98,6 +98,115 @@ export async function getBrowserMetadata() {
   }
 }
 
+export async function getPageContentPreview() {
+  const tabs = await getBrowser().tabs.query({
+    active: true,
+    currentWindow: true,
+  });
+  const tab = tabs && tabs[0];
+
+  if (!tab?.id) {
+    return "";
+  }
+
+  const errorHandler = (error) => {
+    console.error("Failed to load page content preview", error);
+    return "";
+  };
+
+  const timeout = new Promise((resolve) => {
+    window.setTimeout(() => resolve(""), 1500);
+  });
+
+  const preview = useChromeScripting()
+    ? getBrowser()
+        .scripting.executeScript({
+          target: { tabId: tab.id },
+          func: extractPageContentPreview,
+        })
+        .then((result) => result[0].result)
+        .catch(errorHandler)
+    : getBrowser()
+        .tabs.executeScript(tab.id, {
+          code: `(${extractPageContentPreview.toString()})();`,
+        })
+        .then((result) => result[0])
+        .catch(errorHandler);
+
+  return Promise.race([preview, timeout]);
+}
+
+function extractPageContentPreview() {
+  const MAX_CHARS = 1800;
+  const MAX_NODES = 50;
+  const MIN_TEXT_LENGTH = 40;
+  const TIME_BUDGET_MS = 250;
+  const startedAt = performance.now();
+  const parts = [];
+  const seen = new Set();
+  let length = 0;
+  let inspectedNodes = 0;
+
+  const add = (text) => {
+    const normalized = String(text || "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (!normalized || seen.has(normalized) || length >= MAX_CHARS) {
+      return;
+    }
+
+    seen.add(normalized);
+    const remaining = MAX_CHARS - length;
+    const excerpt = normalized.slice(0, remaining);
+    parts.push(excerpt);
+    length += excerpt.length;
+  };
+
+  const isDone = () =>
+    length >= MAX_CHARS ||
+    inspectedNodes >= MAX_NODES ||
+    performance.now() - startedAt > TIME_BUDGET_MS;
+
+  add(document.getSelection()?.toString());
+  add(document.querySelector("h1")?.textContent);
+  add(
+    document
+      .querySelector('meta[property="og:description"]')
+      ?.getAttribute("content"),
+  );
+  add(
+    document.querySelector('meta[name="description"]')?.getAttribute("content"),
+  );
+
+  const container =
+    document.querySelector("article") ||
+    document.querySelector("main") ||
+    document.body;
+
+  if (!container || isDone()) {
+    return parts.join("\n").slice(0, MAX_CHARS);
+  }
+
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_ELEMENT);
+  let node = walker.currentNode;
+
+  while (node && !isDone()) {
+    inspectedNodes += 1;
+
+    if (["H1", "H2", "P"].includes(node.tagName)) {
+      const text = node.textContent;
+      if (text && text.trim().length >= MIN_TEXT_LENGTH) {
+        add(text);
+      }
+    }
+
+    node = walker.nextNode();
+  }
+
+  return parts.join("\n").slice(0, MAX_CHARS);
+}
+
 export function getStorage() {
   if (
     typeof browser !== "undefined" &&
