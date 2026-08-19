@@ -16,6 +16,19 @@ export async function getCurrentTabInfo() {
   };
 }
 
+export async function getSelectedTabs() {
+  const tabs = await getBrowser().tabs.query({
+    highlighted: true,
+    currentWindow: true,
+  });
+
+  return tabs.map((tab) => ({
+    id: tab ? tab.id : "",
+    url: tab ? tab.url : "",
+    title: tab ? tab.title : "",
+  }));
+}
+
 function isFirefox() {
   const runtime = getBrowser().runtime;
   if (runtime && typeof runtime.getURL === "function") {
@@ -32,12 +45,10 @@ function useChromeScripting() {
   return typeof chrome !== "undefined" && !!chrome.scripting;
 }
 
-export async function getBrowserMetadata() {
-  const tabs = await getBrowser().tabs.query({
-    active: true,
-    currentWindow: true,
-  });
-  const tab = tabs && tabs[0];
+export async function getBrowserMetadata(tabId) {
+  const tab = tabId
+    ? { id: tabId }
+    : (await getBrowser().tabs.query({ active: true, currentWindow: true }))[0];
 
   const errorHandler = (error) => {
     console.error("Failed to load browser metadata", error);

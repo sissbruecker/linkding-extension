@@ -22,7 +22,8 @@ export class LinkdingApi {
 
   async saveBookmark(bookmark, options = {}) {
     const configuration = this.configuration;
-    const query = ["disable_scraping"];
+    const query =
+      options.disable_scraping === false ? [] : ["disable_scraping"];
     if (options.disable_html_snapshot) {
       query.push("disable_html_snapshot");
     }
