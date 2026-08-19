@@ -40,6 +40,7 @@ export class PopupForm extends LitElement {
     extensionConfiguration: { type: Object, state: true },
     loading: { type: Boolean, state: true },
     deleteConfirmVisible: { type: Boolean, state: true },
+    conflictingTabs: { type: Array, state: true },
   };
 
   constructor() {
@@ -67,6 +68,8 @@ export class PopupForm extends LitElement {
     this.extensionConfiguration = null;
     this.loading = false;
     this.deleteConfirmVisible = false;
+    this.conflictingTabs = [];
+    this.tabChecksPromise = Promise.resolve(new Map());
   }
 
   createRenderRoot() {
@@ -124,6 +127,32 @@ export class PopupForm extends LitElement {
       this.selectedTabs = validSelectedTabs;
       this.unread = this.configuration.unreadSelected;
       this.shared = false;
+
+      // Check which of the selected tabs are already bookmarked, so we can
+      // warn about overwriting their metadata and tags when saving.
+      const tabsByUrl = new Map();
+      for (const tab of validSelectedTabs) {
+        if (!tabsByUrl.has(tab.url)) {
+          tabsByUrl.set(tab.url, tab);
+        }
+      }
+      const distinctTabs = [...tabsByUrl.values()];
+      this.tabChecksPromise = Promise.all(
+        distinctTabs.map((tab) => this.api.check(tab.url).catch(() => null)),
+      ).then((results) => {
+        const checkResults = new Map();
+        distinctTabs.forEach((tab, i) => {
+          checkResults.set(tab.url, results[i]);
+        });
+
+        this.conflictingTabs = distinctTabs
+          .filter((_, i) => results[i] && results[i].bookmark)
+          .map((tab) => tab.title)
+          .filter((title) => !!title);
+
+        return checkResults;
+      });
+
       return;
     }
 
@@ -216,7 +245,9 @@ export class PopupForm extends LitElement {
         showBadge(this.tabInfo.id);
       }
 
-      this.maybeCloseWindow();
+      if (this.shouldCloseWindow()) {
+        this.closeWindow();
+      }
 
       // Run singlefile, if configured
       if (
@@ -246,6 +277,14 @@ export class PopupForm extends LitElement {
           title = metadata.title || tab.title || "";
           description = metadata.description || "";
           disableScraping = true;
+        } else {
+          const checkResults = await this.tabChecksPromise;
+          const check = checkResults.get(tab.url);
+          if (check?.metadata) {
+            title = check.metadata.title || "";
+            description = check.metadata.description || "";
+            disableScraping = true;
+          }
         }
 
         const bookmark = {
@@ -272,7 +311,9 @@ export class PopupForm extends LitElement {
       }
 
       this.saveState = "success";
-      this.maybeCloseWindow();
+      if (this.shouldCloseWindow()) {
+        this.closeWindow();
+      }
     } catch (e) {
       this.saveState = "error";
       this.errorMessage = e.toString();
@@ -280,16 +321,18 @@ export class PopupForm extends LitElement {
     }
   }
 
-  maybeCloseWindow() {
+  shouldCloseWindow() {
     // Close popup window after saving the bookmark, if configured
-    if (
+    return (
       this.extensionConfiguration?.closeAddBookmarkWindowOnSave === true &&
       this.extensionConfiguration?.closeAddBookmarkWindowOnSaveMs >= 0
-    ) {
-      window.setTimeout(() => {
-        window.close();
-      }, this.extensionConfiguration?.closeAddBookmarkWindowOnSaveMs);
-    }
+    );
+  }
+
+  closeWindow() {
+    window.setTimeout(() => {
+      window.close();
+    }, this.extensionConfiguration?.closeAddBookmarkWindowOnSaveMs);
   }
 
   showDeleteConfirmation() {
@@ -379,6 +422,19 @@ export class PopupForm extends LitElement {
                       </div>
                     `
                   : ""}
+              </div>
+            `
+          : ""}
+        ${bulk && this.conflictingTabs.length > 0
+          ? html`
+              <div class="form-input-hint text-warning">
+                Some of the selected tabs are already bookmarked. Saving will
+                overwrite their metadata and tags:
+                <ul class="conflicting-tabs">
+                  ${this.conflictingTabs.map(
+                    (title) => html`<li>${title}</li>`,
+                  )}
+                </ul>
               </div>
             `
           : ""}
