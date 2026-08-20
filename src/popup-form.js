@@ -121,22 +121,25 @@ export class PopupForm extends LitElement {
       tab.url.match(/^http(s)?:\/\//),
     );
 
-    // When multiple tabs are selected, bookmark all of them with the shared
-    // tags and unread status, without showing title/description fields.
-    if (validSelectedTabs.length > 1) {
-      this.selectedTabs = validSelectedTabs;
+    // Deduplicate by URL, so that multiple tabs on the same URL are only
+    // saved once.
+    const tabsByUrl = new Map();
+    for (const tab of validSelectedTabs) {
+      if (!tabsByUrl.has(tab.url)) {
+        tabsByUrl.set(tab.url, tab);
+      }
+    }
+    const distinctTabs = [...tabsByUrl.values()];
+
+    // When multiple distinct tabs are selected, bookmark all of them with the
+    // shared tags and unread status, without showing title/description fields.
+    if (distinctTabs.length > 1) {
+      this.selectedTabs = distinctTabs;
       this.unread = this.configuration.unreadSelected;
       this.shared = false;
 
       // Check which of the selected tabs are already bookmarked, so we can
       // warn about overwriting their metadata and tags when saving.
-      const tabsByUrl = new Map();
-      for (const tab of validSelectedTabs) {
-        if (!tabsByUrl.has(tab.url)) {
-          tabsByUrl.set(tab.url, tab);
-        }
-      }
-      const distinctTabs = [...tabsByUrl.values()];
       this.tabChecksPromise = Promise.all(
         distinctTabs.map((tab) => this.api.check(tab.url).catch(() => null)),
       ).then((results) => {
@@ -264,10 +267,15 @@ export class PopupForm extends LitElement {
   }
 
   async saveMultipleBookmarks(tagNames) {
-    try {
-      this.saveState = "loading";
+    this.saveState = "loading";
+    const failedUrls = [];
 
-      for (const tab of this.selectedTabs) {
+    for (const tab of this.selectedTabs) {
+      try {
+        const checkResults = await this.tabChecksPromise;
+        const check = checkResults.get(tab.url);
+        const existingBookmark = check?.bookmark || null;
+
         let title = "";
         let description = "";
         let disableScraping = false;
@@ -277,24 +285,22 @@ export class PopupForm extends LitElement {
           title = metadata.title || tab.title || "";
           description = metadata.description || "";
           disableScraping = true;
-        } else {
-          const checkResults = await this.tabChecksPromise;
-          const check = checkResults.get(tab.url);
-          if (check?.metadata) {
-            title = check.metadata.title || "";
-            description = check.metadata.description || "";
-            disableScraping = true;
-          }
+        } else if (check?.metadata) {
+          title = check.metadata.title || "";
+          description = check.metadata.description || "";
+          disableScraping = true;
         }
 
         const bookmark = {
           url: tab.url,
           title,
           description,
-          notes: "",
+          // Preserve notes, unread and shared status for already-bookmarked
+          // URLs instead of resetting them to the defaults.
+          notes: existingBookmark?.notes ?? "",
           tag_names: tagNames,
-          unread: this.unread,
-          shared: false,
+          unread: existingBookmark ? existingBookmark.unread : this.unread,
+          shared: existingBookmark ? existingBookmark.shared : false,
         };
 
         await this.api.saveBookmark(bookmark, {
@@ -308,16 +314,23 @@ export class PopupForm extends LitElement {
         if (this.extensionConfiguration?.precacheEnabled) {
           showBadge(tab.id);
         }
+      } catch (e) {
+        console.error(e);
+        failedUrls.push(tab.url);
       }
+    }
 
-      this.saveState = "success";
-      if (this.shouldCloseWindow()) {
-        this.closeWindow();
-      }
-    } catch (e) {
+    await clearCachedServerMetadata();
+
+    if (failedUrls.length > 0) {
       this.saveState = "error";
-      this.errorMessage = e.toString();
-      console.error(this.errorMessage);
+      this.errorMessage = `Failed to bookmark ${failedUrls.length} of ${this.selectedTabs.length} tabs: ${failedUrls.join(", ")}`;
+      return;
+    }
+
+    this.saveState = "success";
+    if (this.shouldCloseWindow()) {
+      this.closeWindow();
     }
   }
 
