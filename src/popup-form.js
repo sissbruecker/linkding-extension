@@ -32,7 +32,6 @@ export class PopupForm extends LitElement {
     saveState: { type: String, state: true },
     errorMessage: { type: String, state: true },
     availableTagNames: { type: Array, state: true },
-    existingBookmark: { type: Object, state: true },
     editNotes: { type: Boolean, state: true },
     profile: { type: Object, state: true },
     tabInfo: { type: Object, state: true },
@@ -40,7 +39,7 @@ export class PopupForm extends LitElement {
     extensionConfiguration: { type: Object, state: true },
     loading: { type: Boolean, state: true },
     deleteConfirmVisible: { type: Boolean, state: true },
-    conflictingTabs: { type: Array, state: true },
+    existingBookmarks: { type: Array, state: true },
   };
 
   constructor() {
@@ -60,7 +59,6 @@ export class PopupForm extends LitElement {
     this.saveState = "";
     this.errorMessage = "";
     this.availableTagNames = [];
-    this.existingBookmark = null;
     this.editNotes = false;
     this.profile = null;
     this.tabInfo = null;
@@ -68,7 +66,7 @@ export class PopupForm extends LitElement {
     this.extensionConfiguration = null;
     this.loading = false;
     this.deleteConfirmVisible = false;
-    this.conflictingTabs = [];
+    this.existingBookmarks = [];
     this.tabChecksPromise = Promise.resolve(new Map());
   }
 
@@ -126,7 +124,7 @@ export class PopupForm extends LitElement {
       this.shared = false;
 
       // Check which of the selected tabs are already bookmarked, so we can
-      // warn about overwriting their metadata and tags when saving. Check
+      // warn about updating their metadata and tags when saving. Check
       // calls are deduplicated by URL, and only run for http(s) URLs since
       // other schemes cannot be resolved by the server.
       const checkableUrls = [
@@ -140,13 +138,9 @@ export class PopupForm extends LitElement {
           checkResults.set(url, results[i]);
         });
 
-        this.conflictingTabs = [
-          ...new Set(
-            selectedTabs
-              .filter((tab) => checkResults.get(tab.url)?.bookmark)
-              .map((tab) => tab.title),
-          ),
-        ].filter((title) => !!title);
+        this.existingBookmarks = [...checkResults.values()]
+          .filter((check) => check?.bookmark)
+          .map((check) => check.bookmark);
 
         return checkResults;
       });
@@ -183,8 +177,8 @@ export class PopupForm extends LitElement {
     }
 
     const existingBookmark = serverMetadata.bookmark;
+    this.existingBookmarks = existingBookmark ? [existingBookmark] : [];
     if (existingBookmark) {
-      this.existingBookmark = existingBookmark;
       this.title = existingBookmark.title;
       this.tags = existingBookmark.tag_names
         ? existingBookmark.tag_names.join(" ")
@@ -249,7 +243,7 @@ export class PopupForm extends LitElement {
 
       // Run singlefile, if configured
       if (
-        !this.existingBookmark &&
+        this.existingBookmarks.length === 0 &&
         this.extensionConfiguration?.runSinglefile
       ) {
         runSinglefile();
@@ -359,12 +353,12 @@ export class PopupForm extends LitElement {
   }
 
   async confirmDelete() {
-    if (!this.existingBookmark) {
+    if (this.existingBookmarks.length === 0) {
       return;
     }
 
     try {
-      await this.api.deleteBookmark(this.existingBookmark.id);
+      await this.api.deleteBookmark(this.existingBookmarks[0].id);
       await clearCachedServerMetadata();
       removeBadge(this.tabInfo.id);
       window.close();
@@ -406,7 +400,7 @@ export class PopupForm extends LitElement {
         <h1 class="h6">
           ${bulk
             ? `Bookmark ${this.selectedTabs.length} tabs`
-            : this.existingBookmark
+            : this.existingBookmarks.length > 0
               ? "Edit Bookmark"
               : "Add bookmark"}
         </h1>
@@ -428,7 +422,7 @@ export class PopupForm extends LitElement {
                   />
                   ${this.loading ? html`<i class="form-icon loading"></i>` : ""}
                 </div>
-                ${this.existingBookmark
+                ${this.existingBookmarks.length > 0
                   ? html`
                       <div class="form-input-hint text-warning">
                         This URL is already bookmarked. The form has been
@@ -440,15 +434,16 @@ export class PopupForm extends LitElement {
               </div>
             `
           : ""}
-        ${bulk && this.conflictingTabs.length > 0
+        ${bulk && this.existingBookmarks.length > 0
           ? html`
               <div class="form-input-hint text-warning">
                 Some of the selected tabs are already bookmarked. Saving will
                 update their title, description, and tags:
-                <ul class="conflicting-tabs">
-                  ${this.conflictingTabs.map(
-                    (title) => html`<li>${title}</li>`,
-                  )}
+                <ul class="existing-bookmarks">
+                  ${this.existingBookmarks
+                    .map((bookmark) => bookmark.title)
+                    .filter((title) => !!title)
+                    .map((title) => html`<li>${title}</li>`)}
                 </ul>
               </div>
             `
@@ -587,7 +582,7 @@ export class PopupForm extends LitElement {
           ${this.saveState !== "success"
             ? html`
                 <div class="button-row">
-                  ${this.existingBookmark
+                  ${!bulk && this.existingBookmarks.length > 0
                     ? html`
                         <button
                           type="button"

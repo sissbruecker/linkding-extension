@@ -62,7 +62,7 @@ body {
     gap: var(--unit-2);
   }
 
-  .conflicting-tabs {
+  .existing-bookmarks {
     margin: var(--unit-2) 0 0 0;
     padding-left: var(--unit-6);
     list-style: disc;
