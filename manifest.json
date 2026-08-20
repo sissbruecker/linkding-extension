@@ -25,7 +25,7 @@
       "32": "icons/button_32x32.png",
       "38": "icons/button_38x38.png"
     },
-    "default_title": "Add bookmark (Alt+Shift+L)",
+    "default_title": "Add bookmark(s) (Alt+Shift+L)",
     "default_popup": "popup/index.html"
   },
 
@@ -34,7 +34,7 @@
       "suggested_key": {
         "default": "Alt+Shift+L"
       },
-      "description": "Open a popup to bookmark current page."
+      "description": "Open a popup to bookmark the current page or multiple selected tabs."
     }
   },
 
