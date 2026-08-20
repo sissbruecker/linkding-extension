@@ -117,41 +117,36 @@ export class PopupForm extends LitElement {
 
   async initForm() {
     const selectedTabs = await getSelectedTabs();
-    const validSelectedTabs = selectedTabs.filter((tab) =>
-      tab.url.match(/^http(s)?:\/\//),
-    );
 
-    // Deduplicate by URL, so that multiple tabs on the same URL are only
-    // saved once.
-    const tabsByUrl = new Map();
-    for (const tab of validSelectedTabs) {
-      if (!tabsByUrl.has(tab.url)) {
-        tabsByUrl.set(tab.url, tab);
-      }
-    }
-    const distinctTabs = [...tabsByUrl.values()];
-
-    // When multiple distinct tabs are selected, bookmark all of them with the
-    // shared tags and unread status, without showing title/description fields.
-    if (distinctTabs.length > 1) {
-      this.selectedTabs = distinctTabs;
+    // When multiple tabs are selected, bookmark all of them with the shared
+    // tags and unread status, without showing title/description fields.
+    if (selectedTabs.length > 1) {
+      this.selectedTabs = selectedTabs;
       this.unread = this.configuration.unreadSelected;
       this.shared = false;
 
       // Check which of the selected tabs are already bookmarked, so we can
-      // warn about overwriting their metadata and tags when saving.
+      // warn about overwriting their metadata and tags when saving. Check
+      // calls are deduplicated by URL, and only run for http(s) URLs since
+      // other schemes cannot be resolved by the server.
+      const checkableUrls = [
+        ...new Set(selectedTabs.map((tab) => tab.url)),
+      ].filter((url) => url.match(/^http(s)?:\/\//));
       this.tabChecksPromise = Promise.all(
-        distinctTabs.map((tab) => this.api.check(tab.url).catch(() => null)),
+        checkableUrls.map((url) => this.api.check(url).catch(() => null)),
       ).then((results) => {
         const checkResults = new Map();
-        distinctTabs.forEach((tab, i) => {
-          checkResults.set(tab.url, results[i]);
+        checkableUrls.forEach((url, i) => {
+          checkResults.set(url, results[i]);
         });
 
-        this.conflictingTabs = distinctTabs
-          .filter((_, i) => results[i] && results[i].bookmark)
-          .map((tab) => tab.title)
-          .filter((title) => !!title);
+        this.conflictingTabs = [
+          ...new Set(
+            selectedTabs
+              .filter((tab) => checkResults.get(tab.url)?.bookmark)
+              .map((tab) => tab.title),
+          ),
+        ].filter((title) => !!title);
 
         return checkResults;
       });
@@ -268,11 +263,11 @@ export class PopupForm extends LitElement {
 
   async saveMultipleBookmarks(tagNames) {
     this.saveState = "loading";
+    const checkResults = await this.tabChecksPromise;
     const failedUrls = [];
 
     for (const tab of this.selectedTabs) {
       try {
-        const checkResults = await this.tabChecksPromise;
         const check = checkResults.get(tab.url);
         const existingBookmark = check?.bookmark || null;
 
@@ -329,6 +324,13 @@ export class PopupForm extends LitElement {
     }
 
     this.saveState = "success";
+
+    // Run singlefile for all highlighted tabs, which match the saved
+    // selection, so that each bookmark gets a snapshot attached
+    if (this.extensionConfiguration?.runSinglefile) {
+      runSinglefile("save-selected-tabs");
+    }
+
     if (this.shouldCloseWindow()) {
       this.closeWindow();
     }
@@ -442,7 +444,7 @@ export class PopupForm extends LitElement {
           ? html`
               <div class="form-input-hint text-warning">
                 Some of the selected tabs are already bookmarked. Saving will
-                overwrite their metadata and tags:
+                update their title, description, and tags:
                 <ul class="conflicting-tabs">
                   ${this.conflictingTabs.map(
                     (title) => html`<li>${title}</li>`,

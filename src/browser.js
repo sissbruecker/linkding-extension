@@ -181,12 +181,12 @@ export function showSuccessBadge(tabId) {
   });
 }
 
-export function runSinglefile() {
+export function runSinglefile(action = "save-page") {
   const browser = getBrowser();
   const extensionId = isFirefox()
     ? "{531906d3-e22f-4a6c-a102-8057b88a1a63}"
     : "mpiodijhokgodhhofbcjdecpffjipkle";
-  browser.runtime.sendMessage(extensionId, "save-page");
+  browser.runtime.sendMessage(extensionId, action);
 }
 
 export function createTab(url) {
