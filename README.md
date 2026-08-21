@@ -3,7 +3,7 @@
 Companion extension for the self-hosted [linkding](https://github.com/sissbruecker/linkding) bookmark service.
 
 **Features**
-- Quickly add a bookmark for the current tab (keyboard shortcut: <kbd>Alt</kbd><kbd>Shift</kbd><kbd>L</kbd>)
+- Quickly add bookmarks for the current tab, or for multiple selected tabs (keyboard shortcut: <kbd>Alt</kbd><kbd>Shift</kbd><kbd>L</kbd>)
 - Search bookmarks through the Omnibox / address bar (keyword: <kbd>ld</kbd>)
 
 Works with: Firefox, Chrome

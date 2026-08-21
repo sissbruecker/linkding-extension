@@ -61,6 +61,12 @@ body {
     align-items: center;
     gap: var(--unit-2);
   }
+
+  .existing-bookmarks {
+    margin: var(--unit-2) 0 0 0;
+    padding-left: var(--unit-6);
+    list-style: disc;
+  }
 }
 
 .options {
