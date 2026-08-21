@@ -117,11 +117,12 @@ export class PopupForm extends LitElement {
     const selectedTabs = await getSelectedTabs();
 
     // When multiple tabs are selected, bookmark all of them with the shared
-    // tags and unread status, without showing title/description fields.
+    // tags and the unread/shared status defaults, without showing
+    // title/description fields.
     if (selectedTabs.length > 1) {
       this.selectedTabs = selectedTabs;
       this.unread = this.configuration.unreadSelected;
-      this.shared = false;
+      this.shared = this.configuration.shareSelected;
 
       // Check which of the selected tabs are already bookmarked, so we can
       // warn about updating their metadata and tags when saving. Check
@@ -289,7 +290,7 @@ export class PopupForm extends LitElement {
           notes: existingBookmark?.notes ?? "",
           tag_names: tagNames,
           unread: existingBookmark ? existingBookmark.unread : this.unread,
-          shared: existingBookmark ? existingBookmark.shared : false,
+          shared: existingBookmark ? existingBookmark.shared : this.shared,
         };
 
         await this.api.saveBookmark(bookmark, {
