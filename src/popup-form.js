@@ -179,7 +179,7 @@ export class PopupForm extends LitElement {
     try {
       this.saveState = "loading";
 
-      await this.api.saveBookmark(bookmark, {
+      const savedBookmark = await this.api.saveBookmark(bookmark, {
         disable_html_snapshot: this.extensionConfiguration?.runSinglefile,
       });
       await clearCachedServerMetadata();
@@ -210,6 +210,8 @@ export class PopupForm extends LitElement {
       ) {
         runSinglefile();
       }
+
+      this.existingBookmark = savedBookmark;
     } catch (e) {
       this.saveState = "error";
       this.errorMessage = e.toString();
@@ -249,7 +251,11 @@ export class PopupForm extends LitElement {
 
   handleOpenLinkding(e) {
     e.preventDefault();
-    createTab(this.configuration.baseUrl);
+    const baseUrl = this.configuration.baseUrl;
+    const url = this.existingBookmark
+      ? `${baseUrl.replace(/\/+$/, "")}/bookmarks?details=${this.existingBookmark.id}`
+      : baseUrl;
+    createTab(url);
     window.close();
   }
 
@@ -464,7 +470,9 @@ export class PopupForm extends LitElement {
         type="button"
         class="btn btn-link ml-4"
         @click="${this.handleOpenLinkding}"
-        title="Open Linkding"
+        title="${this.existingBookmark
+          ? "Open bookmark in Linkding"
+          : "Open Linkding"}"
       >
         ${icons.externalLink()}
       </button>
