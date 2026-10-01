@@ -45,6 +45,19 @@ body {
     align-items: baseline;
   }
 
+  .similar-bookmarks {
+    ul {
+      margin: var(--unit-1) 0 var(--unit-1) var(--unit-4);
+    }
+
+    li {
+      margin-top: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
   .footer {
     padding-top: var(--unit-4);
     border-top: solid 1px var(--secondary-border-color);
