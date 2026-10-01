@@ -242,6 +242,26 @@ export class PopupForm extends LitElement {
     }
   }
 
+  async handleArchive() {
+    if (!this.existingBookmark) {
+      return;
+    }
+
+    try {
+      if (this.existingBookmark.is_archived) {
+        await this.api.unarchiveBookmark(this.existingBookmark.id);
+      } else {
+        await this.api.archiveBookmark(this.existingBookmark.id);
+      }
+      await clearCachedServerMetadata();
+      window.close();
+    } catch (e) {
+      this.saveState = "error";
+      this.errorMessage = e.toString();
+      console.error(this.errorMessage);
+    }
+  }
+
   handleOptions(e) {
     e.preventDefault();
     openOptions();
@@ -291,9 +311,12 @@ export class PopupForm extends LitElement {
           ${this.existingBookmark
             ? html`
                 <div class="form-input-hint text-warning">
-                  This URL is already bookmarked. The form has been prefilled
-                  from the existing bookmark, and saving the form will update
-                  the existing bookmark.
+                  This URL is already
+                  bookmarked${this.existingBookmark.is_archived
+                    ? " (archived)"
+                    : ""}.
+                  The form has been prefilled from the existing bookmark, and
+                  saving the form will update the existing bookmark.
                 </div>
               `
             : ""}
@@ -431,6 +454,7 @@ export class PopupForm extends LitElement {
                         >
                           ${icons.delete()}
                         </button>
+                        ${this.renderArchiveButton()}
                       `
                     : nothing}
                   <button
@@ -447,6 +471,22 @@ export class PopupForm extends LitElement {
       </form>
 
       ${this.deleteConfirmVisible ? this.renderDeleteConfirmation() : nothing}
+    `;
+  }
+
+  renderArchiveButton() {
+    const archived = this.existingBookmark.is_archived;
+    const label = archived ? "Unarchive bookmark" : "Archive bookmark";
+    return html`
+      <button
+        type="button"
+        class="btn ml-2"
+        aria-label="${label}"
+        title="${label}"
+        @click="${this.handleArchive}"
+      >
+        ${archived ? icons.unarchive() : icons.archive()}
+      </button>
     `;
   }
 
