@@ -13,6 +13,10 @@ import { loadServerMetadata, clearCachedServerMetadata } from "./cache.js";
 import { getProfile, updateProfile } from "./profile.js";
 import { getConfiguration } from "./configuration.js";
 import { icons } from "./icons";
+import { findSimilarBookmarks, getSearchHost } from "./similar.js";
+
+const SIMILAR_SEARCH_LIMIT = 100;
+const SIMILAR_DISPLAY_LIMIT = 5;
 
 export class PopupForm extends LitElement {
   static properties = {
@@ -38,6 +42,7 @@ export class PopupForm extends LitElement {
     extensionConfiguration: { type: Object, state: true },
     loading: { type: Boolean, state: true },
     deleteConfirmVisible: { type: Boolean, state: true },
+    similarBookmarks: { type: Object, state: true },
   };
 
   constructor() {
@@ -64,6 +69,7 @@ export class PopupForm extends LitElement {
     this.extensionConfiguration = null;
     this.loading = false;
     this.deleteConfirmVisible = false;
+    this.similarBookmarks = null;
   }
 
   createRenderRoot() {
@@ -113,6 +119,9 @@ export class PopupForm extends LitElement {
     this.tabInfo = await getCurrentTabInfo();
     this.url = this.tabInfo.url;
 
+    // Look for similar bookmarks in the background
+    this.loadSimilarBookmarks(this.url);
+
     this.loading = true;
 
     const [serverMetadata, browserMetadata] = await Promise.all([
@@ -158,6 +167,41 @@ export class PopupForm extends LitElement {
         this.autoTags = autoTagsList.join(" ");
       }
     }
+  }
+
+  async loadSimilarBookmarks(url) {
+    const host = getSearchHost(url);
+    if (!host) {
+      return;
+    }
+
+    try {
+      const options = { limit: SIMILAR_SEARCH_LIMIT };
+      const [bookmarks, archivedBookmarks] = await Promise.all([
+        this.api.search(host, options),
+        this.api.search(host, { ...options, archived: true }),
+      ]);
+      const { prefixMatches, domainMatches } = findSimilarBookmarks(url, [
+        ...bookmarks,
+        ...archivedBookmarks,
+      ]);
+      this.similarBookmarks = {
+        host,
+        prefixMatches,
+        domainMatches,
+        truncated:
+          bookmarks.length >= SIMILAR_SEARCH_LIMIT ||
+          archivedBookmarks.length >= SIMILAR_SEARCH_LIMIT,
+      };
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  handleOpenUrl(e, url) {
+    e.preventDefault();
+    createTab(url);
+    window.close();
   }
 
   async handleSubmit(e) {
@@ -296,7 +340,7 @@ export class PopupForm extends LitElement {
                   the existing bookmark.
                 </div>
               `
-            : ""}
+            : this.renderSimilarBookmarks()}
         </div>
         <div class="form-group">
           <label class="form-label" for="input-tags">Tags</label>
@@ -447,6 +491,59 @@ export class PopupForm extends LitElement {
       </form>
 
       ${this.deleteConfirmVisible ? this.renderDeleteConfirmation() : nothing}
+    `;
+  }
+
+  renderSimilarBookmarks() {
+    // Wait for the exact match check, which hides this hint
+    if (!this.similarBookmarks || this.loading) {
+      return nothing;
+    }
+    const { host, prefixMatches, domainMatches, truncated } =
+      this.similarBookmarks;
+    if (prefixMatches.length === 0 && domainMatches.length === 0) {
+      return nothing;
+    }
+
+    const shownMatches = prefixMatches.slice(0, SIMILAR_DISPLAY_LIMIT);
+    const otherCount =
+      domainMatches.length + prefixMatches.length - shownMatches.length;
+    const searchUrl = `${this.configuration.baseUrl}/bookmarks?q=${encodeURIComponent(host)}`;
+
+    return html`
+      <div class="form-input-hint text-warning similar-bookmarks">
+        ${shownMatches.length > 0
+          ? html`
+              <div>Similar URLs are already bookmarked:</div>
+              <ul>
+                ${shownMatches.map(
+                  (bookmark) => html`
+                    <li>
+                      <a
+                        href="${bookmark.url}"
+                        title="${bookmark.title || bookmark.url}"
+                        @click="${(e) => this.handleOpenUrl(e, bookmark.url)}"
+                        >${bookmark.url.replace(/^https?:\/\//, "")}</a
+                      >${bookmark.is_archived ? " (archived)" : ""}
+                    </li>
+                  `,
+                )}
+              </ul>
+            `
+          : nothing}
+        ${otherCount > 0
+          ? html`
+              <a
+                href="${searchUrl}"
+                @click="${(e) => this.handleOpenUrl(e, searchUrl)}"
+              >
+                ${otherCount}${truncated ? "+" : ""}
+                ${shownMatches.length > 0 ? "more" : ""}
+                bookmark${otherCount === 1 && !truncated ? "" : "s"} on ${host}
+              </a>
+            `
+          : nothing}
+      </div>
     `;
   }
 

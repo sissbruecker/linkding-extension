@@ -85,9 +85,10 @@ export class LinkdingApi {
     const configuration = this.configuration;
     const q = encodeURIComponent(text);
     const limit = options.limit || 100;
+    const path = options.archived ? "bookmarks/archived" : "bookmarks";
 
     return fetch(
-      `${configuration.baseUrl}/api/bookmarks/?q=${q}&limit=${limit}`,
+      `${configuration.baseUrl}/api/${path}/?q=${q}&limit=${limit}`,
       {
         headers: {
           Authorization: `Token ${configuration.token}`,
